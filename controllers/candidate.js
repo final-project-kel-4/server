@@ -1,4 +1,5 @@
 const Candidate = require('../models/candidate')
+const TextUtility = require('../helpers/textProcessing')
 
 class CandidateController {
     static async findAll(req, res) {
@@ -34,6 +35,15 @@ class CandidateController {
     static async create(req, res) {
         let newData = req.body
         let created;
+
+        /**
+         * property profile of Candidate must have following attributes:
+            currentPosition: "",
+            about: "",
+            workExperience: ["", ""],
+            recommendations: ["", ""]
+            educations: ["", ""] (optional params)
+        */
 
         try {
             created = await Candidate.create(newData);

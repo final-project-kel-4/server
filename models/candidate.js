@@ -24,7 +24,12 @@ let candidateSchema = new Schema({
     },
     linkedinURL: {
         type: String,
-        required: [true, 'Please specify candidate public LinkedIn']
+        validate: {
+            validator: function(value) {
+                return /(https?:\/\/(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z0-9][a-z0-9-]{0,61}[a-z0-9])(:?\d*)\/?([a-z_\/0-9\-#.]*)\??([a-z_\/0-9\-#=&]*)/.test(value)
+            },
+            msg: 'Must be valid URL'
+        }
     },
     phone: {
         type: String,

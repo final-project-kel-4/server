@@ -6,9 +6,18 @@ let jobSchema = new Schema({
         type: String,
         required: [true, "Job title/position is required"]
     },
-    rawDescription: {
+    linkedinURL: {
         type: String,
-        required: [true, 'Raw Job description is required']
+        validate: {
+            validator: function(value) {
+                return /(https?:\/\/(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z0-9][a-z0-9-]{0,61}[a-z0-9])(:?\d*)\/?([a-z_\/0-9\-#.]*)\??([a-z_\/0-9\-#=&]*)/.test(value)
+            },
+            msg: 'Must be valid URL'
+        }
+    },
+    originalDescription: {
+        type: String,
+        required: [true, 'Origin Job description is required']
     },
     cleanDescription: {
         type: String
