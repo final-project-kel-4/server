@@ -19,7 +19,11 @@ class userController {
   }
 
   static signin(req, res) {
-    modelUser.findOne({ email: req.body.email })
+    let email = ''
+    if(req.body.email) email = { email: req.body.email }
+
+
+    modelUser.findOne(email)
       .then(userFound => {
         if (userFound) {
           if (compare(req.body.password, userFound.password)) {

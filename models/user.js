@@ -15,9 +15,6 @@ let userSchema = new Schema({
               throw "Email in use"
             }
           })
-          .catch(err => {
-            throw err
-          })
       },
     }]
   },
