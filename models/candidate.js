@@ -22,6 +22,10 @@ let candidateSchema = new Schema({
         type: Object,
         default: {}
     },
+    originalProfile: {
+        type: Object,
+        default: {}
+    },
     linkedinURL: {
         type: String,
         validate: {

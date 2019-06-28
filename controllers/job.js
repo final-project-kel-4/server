@@ -33,11 +33,14 @@ class JobController {
     }
     
     static async create(req, res) {
-        let newData = req.body
+        let newData, linkedinLink = req.body.linkedin
         let created;
 
+        //TODO: Call job scrapper
+        // newData = job_scrapper();
+        
         //process job descriptions (remove stop words, lowercase, duplicate, etc)
-        newData.cleanedDescription = TextUtility.cleanInput(newData.originalDescription)
+        //newData.cleanedDescription = TextUtility.cleanInput(newData.originalDescription)
 
         try {
             created = await Job.create(newData);

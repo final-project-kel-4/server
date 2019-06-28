@@ -19,12 +19,11 @@ let jobSchema = new Schema({
         type: String,
         required: [true, 'Origin Job description is required']
     },
-    cleanDescription: {
+    html: {
         type: String
     },
-    score: {
-        type: Number,
-        default: 0.0
+    cleanDescription: {
+        type: String
     },
     user: {
         type: Schema.Types.ObjectId,

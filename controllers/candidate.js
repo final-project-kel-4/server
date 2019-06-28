@@ -33,7 +33,7 @@ class CandidateController {
     }
     
     static async create(req, res) {
-        let newData = req.body
+        let newData, linkedinLink = req.body.linkedin
         let created;
 
         /**
@@ -44,6 +44,10 @@ class CandidateController {
             recommendations: ["", ""]
             educations: ["", ""] (optional params)
         */
+
+        // TODO: will call scrapping
+        // newData = scrapping_method();
+        // newData.profile = helper.cleanCandidateProfile(newData.profile)
 
         try {
             created = await Candidate.create(newData);
