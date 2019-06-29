@@ -2,8 +2,8 @@ const Candidate = require('../models/candidate')
 const TextUtility = require('../helpers/textProcessing')
 
 const dummy = {
-    name: 'Tyas Kokasih',
-    // linkedinURL: "https://www.linkedin.com/in/tyas-kokasih-860ab153/",
+    name: 'Dummy 1',
+    linkedinURL: "https://www.linkedin.com/in/tyas-kokasih-860ab153/",
     profile: {
         currentPosition: "Software Engineer at Gemalto",
         about: `Software engineer with experience in Eclipse RCP framework (Java) and test automation in HP QTP / UFT. A passionate and fast learner. Focused mainly in managing information complexity.
@@ -33,6 +33,72 @@ const dummy = {
     },
 }
 
+
+const dummy2 = {
+    name: 'Dummy 2',
+    linkedinURL: 'https://www.linkedin.com/in/moussa-boudouh-2b333014/',
+    profile: {
+        currentPosition: "Senior Cost Engineer chez EDF Energy",
+        about: ``,
+        workExperience: [`I am responsible for the control and the monitor of the project total expenditure including verifying and checking of invoices and claims from suppliers, vendors and subcontractors to ensure
+        that all project expenditures are captured and properly recorded.
+        I Provide planning and cost controlling support for all projects which includes variation
+        reporting, monitoring of milestone progress to the preparation of customer billing
+        processes, etc
+        I Perform and manage project activity scheduling and monitoring
+        I monitor the WBS with the use of project management system to monitor the status of all purchases, invoicing and delivery up to the closure of the project.
+        I Provide cost control and planning advice to the project manager as and when
+        required.`,
+        `I was responsible for: 
+        - the electrical installation of the nuclear plants of Creys-Malville and Bugey 1,
+        - the preparation of technical studies, 
+        - the technical specifications, 
+        - the estimations, 
+        - the supervision of contract and suppliers studies`,
+        `Subject: modification of an evaporation hall, 
+        Cost control, planning, liaison with the different subcontractors, management of 10 people and management of the construction works`
+    ],
+        recommendations: [``],
+        educations: [`Nanyang Technological University
+        Bachelor of Electrical and Electronic Engineering`],
+    },
+}
+
+const dummy3 = {
+    name: 'Dummy 3',
+    linkedinURL: 'https://www.linkedin.com/in/agnes-k/',
+    profile: {
+        currentPosition: "HR Consultant, Recruiter - Tech Talents, Asia | Growth and Productivity Hacker | Business Developer | Mother |",
+        about: ` recruit senior techno-commercial talents across Asia.
+
+        My professional career started in Warsaw, Poland, where I moved to study from my hometown Grodno in Belarus. Winning grant for 2 faculties in 2 Universities in Warsaw, I could not choose, and I took them both. This way I graduated from Sociology (economics and advertising) and Polish Philology (language for foreigners).
+        
+        Education and facilitating communities became my lifetime passion. Though my major focus was always placed in the business world. Within 10 years of my career, I spent 5 in Business Development, 2 in Management and 5 in Sales. Exposure to a variety of industries (from energy market, renewable energy, in particular, investment and trading to education and entrepreneurs) provided a solid overview of functioning with and within organizations on all levels.`,
+        
+        workExperience: [`This service provider is among the best 20 HR software and is a trusted HR Tech partner for 100+ organizations. Soon also in Poland`,
+        `Blockchain Zoo is a software company and an association of technology professionals with a magnificent pipeline of various projects, blockchain technology based. During the first year, BCZ has grown from a bunch of enthusiasts into a well-recognized group of companies listed by Gartner. Founders are invited as expert speakers all over the Asia Pacific and featured in Forbes, BBC, CNBC. 
+        Key Responsibility: to enable a step up and take a group of companies from Pan Asian to a Global reach.`,
+        `Business models evaluation for ASEAN region and market research for: retail electricity market in Singapore, Renewable Energy Sources in Indonesia, Singapore and Philippines.
+
+        Head hunting and requiting for top management positions in the Virtuse Group.
+        
+        Establishing infrastructure for the Rooftop Solar Development in Philippines.
+        
+        Obtaining the license of Energy Market Authority of Singapore for Retailer.
+        
+        Requiting and coordinating subcontractors for marketing purposes: copywriters, designers, web developers.
+        
+        Participation in events: Renewable Energy (Jakarta, Indonesia), Singaporean International Energy Week (Singapore), Solar Philippines Exhibition (Manila, Philippines) 
+        
+        Achievements summary: Evaluating potential in various markets in ASEAN region and launching 2 startups – Energy Retail in Singapore, Solar Development in Philippines`
+    ],
+        recommendations: [`I have had the pleasure of working with Agnes over the last year on building up a pipeline of enterprise clients in Indonesia. Agnes has helped us step away from the traditional lead generation methods and techniques into a more creative, personal and interactive lead generation strategy. In Q1 of 2019 we say an overall increase of more than 100% in qualified leads at Meiro and this was largely due to the strategy put inlace by Agnes and her team.`,
+        `We've been working with Agnes for a few months now, and must say we're impressed! An intriguing blend of technical ability and strategic thought, backed by sheer hard work!`,
+        `Agnes is very passionate about what she does. I had the pleasure of attending one of her workshops recently where she shared a wealth of knowledge and information. The value added during this course has helped me personally further expand my contacts and exposure. Agnes is truly driven and willing to share and help`
+    ],
+        educations: [`Collegium Civitas Bachelor's Degree, Sociology`],
+    },
+}
 
 class CandidateController {
     static async findAll(req, res) {
@@ -79,19 +145,8 @@ class CandidateController {
         */
 
         //preprocess DUMMY data
-        newData = {profile: {}}
-        newData.name = dummy.name
-        newData.linkedinURL = linkedinLink
-        newData.profile.about = TextUtility.cleanInput(dummy.profile.about)
-        newData.profile.workExperience = dummy.profile.workExperience.map(x => {
-            return TextUtility.cleanInput(x)
-        })
-        newData.profile.recommendations = dummy.profile.recommendations.map(x => {
-            return TextUtility.cleanInput(x)
-        })
-        newData.profile.educations = dummy.profile.educations.map(x => {
-            return TextUtility.cleanInput(x)
-        })
+        newData = initModelData(dummy2)
+        newData.user = req.user._id
 
         try {
             created = await Candidate.create(newData);
@@ -126,6 +181,27 @@ class CandidateController {
             res.status(500).json(err)
         }
     }
+}
+
+const initModelData = (rawData) => {
+    let newData = {profile: {}}
+        
+    // newData.name = dummy.name
+    newData.name = rawData.name
+    newData.linkedinURL = rawData.linkedinLink
+    newData.profile.currentPosition = rawData.profile.currentPosition
+    newData.profile.about = TextUtility.cleanInput(rawData.profile.about)
+    newData.profile.workExperience = rawData.profile.workExperience.map(x => {
+        return TextUtility.cleanInput(x)
+    })
+    newData.profile.recommendations = rawData.profile.recommendations.map(x => {
+        return TextUtility.cleanInput(x)
+    })
+    newData.profile.educations = rawData.profile.educations.map(x => {
+        return TextUtility.cleanInput(x)
+    })
+
+    return newData
 }
 
 module.exports = CandidateController
