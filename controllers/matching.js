@@ -101,6 +101,7 @@ class MatchingController {
             //get all candidate objects
             candidates = await Promise.all(promises);
 
+            console.log(candidates);
             //iterates all candidates' profile and compare the similarities
             candidates.forEach(person => {
                 console.log(`\n\nComputing candidate --- ${person.name}\n`);
