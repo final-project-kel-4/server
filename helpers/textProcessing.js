@@ -21,8 +21,9 @@ class Utility {
            paramScore = 0.0
 
            if(param === 'currentPosition') {
-               paramScore = Similarity.compareTwoStrings(job.title, profile[param]) * COEFFICIENTS[param]
-               console.log(`\nparam: ${param} | itemScore = (${paramScore}) | Coefficient = (${COEFFICIENTS[param]}) | totalScore: ${paramScore}`);
+               paramScore = Similarity.compareTwoStrings(job.title, profile[param])
+               console.log(`\nparam: ${param} | itemScore = (${paramScore}) | Coefficient = (${COEFFICIENTS[param]})`);
+               paramScore *= COEFFICIENTS[param]
            }
            else {
             if(typeof(profile[param]) === 'string') {
