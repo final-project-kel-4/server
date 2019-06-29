@@ -46,6 +46,7 @@ class JobController {
             //init Job model data
             newData = JobController.initJobData(scrapJobData)
             newData.linkedinURL = linkedinLink;
+            newData.user = req.user
             
             created = await Job.create(newData);
 
@@ -69,7 +70,7 @@ class JobController {
         try {
             deleted = await Job.findOneAndDelete({ _id: id });
             if (deleted) {
-                res.status(201).json(created)
+                res.status(201).json(deleted)
             }
             else {
                 throw Error("Invalid ID")
