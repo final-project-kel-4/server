@@ -8,6 +8,6 @@ router.use('/', authenticate)
 router.get('/', candidate.findAll)
 router.get('/:id', candidate.findOne)
 router.post('/', candidate.create)
-router.delete('/', authorizeCandidate, candidate.create)
+router.delete('/:id', authorizeCandidate, candidate.create)
 
 module.exports = router
