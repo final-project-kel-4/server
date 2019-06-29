@@ -21,48 +21,67 @@ class Matching {
     }
 
     static async create(req, res) {
-        let job = req.body.job
+        let jobId = req.body.job
         let candidates = req.body.candidates
-        let matchingData, promises = [], matchingItems = []
+        let matchingData, newMatching, matchingItems = []
 
         try {
-            // TODO - Perform the matching/comparison   
-            // 1. Get the Job model
-            job = await Job.findOne({_id: job});
+            // TODO - Perform the matching/comparison
+            job = await Job.findOne({_id: jobId});
+
+            if(!job) {
+                throw Error('Invalid Job ID -> ' + jobId)
+            }
 
             if(candidates && candidates.length > 0) {
-                req.body.candidates.forEach(candidateId => {
-                    promises.push(Candidate.findOne({_id: candidateId}))
-                });
+                
+                //calculate rank. matchingDat -> [{candidateId, score}, {candidateId, score}, ..]
+                matchingData = Matching.matchCandidates(jobId, candidates);
 
-                candidates = await Promise.all(promises)
-
-                //TODO: check if candidateID is valid
-                candidates.forEach(can => {
-                    if(!can) {
-                        
-                    }
-                    else {
-
-                    }
-                })
-                // if valid, create MatchingItem, and push to matching array
-                // if not valid, create Candidate -> MatchingItem -> push to matching array
-
-                //calculate rank
-                matchingData = stringSimilarity.findBestMatch(job, candidates)
-
-                res.status(200).json(matchingData)
-
+                if(!matchingData) {
+                    throw Error("Error calculating scores. Please try again")
+                }
+                
+                newMatching = await Matching.create({job: jobId, items: matchingItems}).populate('items');
+                res.status(201).json(newMatching)
             }
             else {
-                res.status(400).json("No candidate selected!")
+                res.status(400).json("Please select at least one candidate!")
             }
         }
         catch(err) {
             console.log("ERR - Matching::create \n", err);
             res.status(500).json(err)
         }
+    }
+
+    static async matchCandidates(jobId, candidateIds) {
+        let job, matchingData
+        let candidates, promises;
+        let profile, score;
+
+        try {
+            job = await Job.findOne({_id: jobId});
+            
+            candidateIds.forEach(id => {
+                promises.push(Candidate.findOne({_id: id}))
+            });
+    
+            //get all candidate objects
+            candidates = await Promise.all(promises);
+
+            //iterates all candidates' profile and compare the similarities
+            candidates.forEach(person => {
+                profile = person.profile;
+                score = TextUtility.compareOneCandidate(job.description, profile)
+            })
+
+        }
+        catch(err) {
+            console.log("ERR - Matching::matchCandidates \n", err)
+            return null;
+        }
+
     }
 
     static async refreshMatching(req, res) {

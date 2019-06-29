@@ -22,7 +22,6 @@ class userController {
     let email = ''
     if(req.body.email) email = { email: req.body.email }
 
-
     modelUser.findOne(email)
       .then(userFound => {
         if (userFound) {

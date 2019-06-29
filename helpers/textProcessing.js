@@ -1,6 +1,42 @@
 const sw = require('stopword');
+const COEFFICIENTS = require('../constants')
+const Similarity = require('string-similarity');
 
 class Utility {
+    static compareOneCandidate(jobDescription, profile) {
+        /* 
+        *   jobDescription - String 
+        *   profile - Object with params:
+        *       currentPosition: String, coefficient
+        *       about: "",
+        *       workExperience: ["", ""],
+        *       recommendations: ["", ""]
+        *       educations: ["", ""] (optional params)
+        */
+       let score = 0.0, paramScore = 0.0
+       let profileParams = []
+       profileParams = Object.keys(profile)
+
+       profileParams.forEach(param => {
+           paramScore = 0.0
+
+           if(typeof(param) !== 'string') {
+               //for param that are array of strings (work experience, recommendations)
+               param.forEach(paramDesc => {
+                   paramScore += Similarity.compareTwoStrings(jobDescription, paramDesc) * COEFFICIENTS[param];
+               })
+           }
+           else {
+               paramScore = Similarity.compareTwoStrings(jobDescription, profile[param]) * COEFFICIENTS[param];
+           }
+           
+           console.log(`Calculating param[${param}] - SCORE = ${paramScore}`)
+           score += paramScore
+       });
+
+       return score
+    }
+
     static cleanInput(input) {
         let cleaned, temp;
 
