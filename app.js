@@ -3,6 +3,7 @@ const express = require('express')
 const cors = require('cors')
 const mongoose = require('mongoose')
 const route = require('./routes')
+const morgan = require('morgan')
 const port = process.env.PORT
 
 let app = express()
@@ -12,6 +13,7 @@ app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
 app.use(cors())
 
+app.use(morgan('dev'))
 app.use('/', route)
 
 app.listen(port, () => {
