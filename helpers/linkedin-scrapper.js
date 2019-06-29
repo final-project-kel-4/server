@@ -105,7 +105,6 @@ function scrapProfile (url) {
 
   return new Promise((resolve, reject) => {
     if (!/linkedin/g.test(url)) reject({ message: 'Not a linkedIn link' })
-    if (!/job/g.test(url)) reject({ message: 'Not a linkedIn Job link' })
 
     resolve(
       puppeteer
