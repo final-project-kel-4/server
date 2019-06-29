@@ -16,12 +16,12 @@ class Utility {
        let score = 0.0, paramScore = 0.0
        let profileParams = []
        profileParams = Object.keys(profile)
-
+       
        profileParams.forEach(param => {
            paramScore = 0.0
 
            if(param === 'currentPosition') {
-               paramScore = Similarity.compareTwoStrings(job.title, profile[param])
+               paramScore = Similarity.compareTwoStrings(job.get("title"), profile[param])
                console.log(`\nparam: ${param} | itemScore = (${paramScore}) | Coefficient = (${COEFFICIENTS[param]})`);
                paramScore *= COEFFICIENTS[param]
            }
