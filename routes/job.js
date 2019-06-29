@@ -5,9 +5,9 @@ const authenticate = require('../middlewares/authenticate')
 
 router.use('/', authenticate)
 
-router.get('/', authenticate, jobController.findAll)
+router.get('/', jobController.findAll)
 router.get('/:id', jobController.findOne)
-router.post('/', authenticate, jobController.create)
-router.delete('/', authorizeJob, jobController.create)
+router.post('/', jobController.create)
+router.delete('/:id', authorizeJob, jobController.create)
 
 module.exports = router
