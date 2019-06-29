@@ -6,33 +6,31 @@ const { user } = require('../helpers/clear')
 chai.should()
 chai.use(chaiHttp)
 
-before(function (done) {
-  user(done)
-});
-
-let newUser = {
-  name: 'tio',
-  email: 'tio@gmail.com',
-  password: '123'
-}
-
-let userLogin = {
-  email: newUser.email,
-  password: newUser.password
-}
-
-let userLoginWrongPassword = {
-  email: newUser.email,
-  password: 'sasss'
-}
-
-let userLoginWrongEmail = {
-  email: 'tes@gmail.com',
-  password: newUser.password
-}
-
 describe('User', function () {
-
+  after(function (done) {
+    user(done)
+  });
+  
+  let newUser = {
+    name: 'tio',
+    email: 'tio@gmail.com',
+    password: '123'
+  }
+  
+  let userLogin = {
+    email: newUser.email,
+    password: newUser.password
+  }
+  
+  let userLoginWrongPassword = {
+    email: newUser.email,
+    password: 'sasss'
+  }
+  
+  let userLoginWrongEmail = {
+    email: 'tes@gmail.com',
+    password: newUser.password
+  }
   describe('POST /signup', function () {
     it('should send a new object user', function (done) {
       chai
@@ -55,7 +53,7 @@ describe('User', function () {
         })
     })
 
-    it('should send a new object user', function (done) {
+    it('should send a error because duplicate email', function (done) {
       chai
         .request(app)
         .post('/user/signup')
