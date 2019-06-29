@@ -57,7 +57,7 @@ const scrapJobByUrl = (url) => {
           return page.goto(url)
         })
         .then(() => {
-          // page.waitFor(500).then(() => browser.close())
+          page.waitFor(500).then(() => browser.close())
           return page.evaluate(
             (jobQueries) => {
               let data = {}

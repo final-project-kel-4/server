@@ -2,7 +2,7 @@ const mongoose = require('mongoose')
 const Schema = mongoose.Schema
 
 let jobSchema = new Schema({
-    title: {
+    jobTitle: {
         type: String,
         required: [true, "Job title/position is required"]
     },
@@ -15,11 +15,11 @@ let jobSchema = new Schema({
             msg: 'Must be valid URL'
         }
     },
-    originalDescription: {
+    rawText: {
         type: String,
         required: [true, 'Origin Job description is required']
     },
-    html: {
+    rawHtml: {
         type: String
     },
     cleanDescription: {
