@@ -2,6 +2,10 @@ const mongoose = require('mongoose')
 const Schema = mongoose.Schema
 
 let matchingItemSchema = new Schema({
+    job: {
+        type: Schema.Types.ObjectId,
+        ref: 'Job'
+    },
     candidate: {
         type: Schema.Types.ObjectId,
         required: [true, "Candidate is required"]
