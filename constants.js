@@ -1,7 +1,11 @@
+// Weight of each profile parameters
+// if all profiles are fulfilled and has score of 100%, then
+// total score after summing each of below parameters will be 100%
+
 module.exports = {
-    currentPosition: 5.0,
-    about: 3.0,
-    workExperience: 6.0,
-    recommendations: 8.0,
-    educations: 3.0
+    currentPosition: 0.3,
+    about: 0.2,
+    workExperience: 0.35,
+    recommendations: 0.10,
+    educations: 0.5,
 }
