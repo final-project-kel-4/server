@@ -35,7 +35,7 @@ class JobController {
     
     static async create(req, res) {
         let newData, linkedinLink = req.body.linkedin
-        let created, scrapJobData, cleaned;
+        let created, scrapJobData;
         scrapJobData = await scrapJobByUrl(linkedinLink);
 
         try {
@@ -45,6 +45,7 @@ class JobController {
             //init Job model data
             newData = JobController.initJobData(scrapJobData)
             newData.linkedinURL = linkedinLink;
+            newData.user = req.user._id;
             
             created = await Job.create(newData);
 
