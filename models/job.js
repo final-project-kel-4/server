@@ -6,6 +6,10 @@ let jobSchema = new Schema({
         type: String,
         required: [true, "Job title/position is required"]
     },
+    company: {
+        type: Object,
+        default: {}
+    },
     linkedinURL: {
         type: String,
         validate: {
@@ -15,12 +19,12 @@ let jobSchema = new Schema({
             msg: 'Must be valid URL'
         }
     },
+    rawHtml: {
+        type: String
+    },
     originalDescription: {
         type: String,
         required: [true, 'Origin Job description is required']
-    },
-    html: {
-        type: String
     },
     cleanDescription: {
         type: String
