@@ -1,3 +1,4 @@
+/* istanbul ignore file */
 const puppeteer = require('puppeteer')
 
 const scrapJob = (url) => {
@@ -28,7 +29,7 @@ const scrapJob = (url) => {
           return page.goto(url)
         })
         .then(() => {
-          page.waitFor(500).then(() => browser.close())
+          page.waitFor(1000).then(() => browser.close())
           return page.evaluate(
             (jobQueries) => {
               let data = {}
@@ -109,7 +110,6 @@ function scrapProfile (url) {
     resolve(
       puppeteer
       .launch({
-        headless: false,
         args: ['--no-sandbox', '--disable-setuid-sandbox']
       })
       .then(obj => {
@@ -146,7 +146,9 @@ function scrapProfile (url) {
         }
       ))
       .then(() => page.waitFor(3000))
-      .then(() => page.evaluate(
+      .then(() => {
+        page.waitFor(1000).then(() => browser.close())
+        return page.evaluate(
         (queries) => {
           const getInnerText = (rootEl, selector) => {
             if (rootEl.querySelector(selector)) {
@@ -244,7 +246,7 @@ function scrapProfile (url) {
 
           return data
         }, queries
-      ))
+      )})
     )
   })
 }
