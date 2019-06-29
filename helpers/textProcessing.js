@@ -3,7 +3,7 @@ const COEFFICIENTS = require('../constants')
 const Similarity = require('string-similarity');
 
 class Utility {
-    static compareOneCandidate(jobDescription, profile) {
+    static compareOneCandidate(job, profile) {
         /* 
         *   jobDescription - String 
         *   profile - Object with params:
@@ -20,20 +20,36 @@ class Utility {
        profileParams.forEach(param => {
            paramScore = 0.0
 
-           if(typeof(param) !== 'string') {
-               //for param that are array of strings (work experience, recommendations)
-               param.forEach(paramDesc => {
-                   paramScore += Similarity.compareTwoStrings(jobDescription, paramDesc) * COEFFICIENTS[param];
-               })
+           if(param === 'currentPosition') {
+               paramScore = Similarity.compareTwoStrings(job.title, profile[param]) * COEFFICIENTS[param]
+               console.log(`\nparam: ${param} | itemScore = (${paramScore}) | Coefficient = (${COEFFICIENTS[param]}) | totalScore: ${paramScore}`);
            }
            else {
-               paramScore = Similarity.compareTwoStrings(jobDescription, profile[param]) * COEFFICIENTS[param];
+            if(typeof(profile[param]) === 'string') {
+                let rawScore = Similarity.compareTwoStrings(job.cleanDescription, profile[param])
+                paramScore = rawScore * COEFFICIENTS[param];
+                console.log(`\nparam: ${param} | itemScore = (${rawScore}) | Coefficient = (${COEFFICIENTS[param]}) | totalScore: ${paramScore}`);
+             }
+             else {
+                 //for param that are array of strings (work experience, recommendations)
+                 let arr = profile[param]
+                 let subScore = 0.0
+                 arr.forEach(paramDesc => {
+                     let rawScore = Similarity.compareTwoStrings(job.cleanDescription, paramDesc);
+                     paramScore += rawScore
+                     
+                     console.log(`\nparam: ${param} | itemScore = (${rawScore}) | Coefficient = (${COEFFICIENTS[param]})`);
+                 })
+ 
+                 paramScore = (paramScore / ( arr.length * 1.0)) * COEFFICIENTS[param];
+                 console.log(`\nparam (${param}) total score = ${paramScore}\n`);
+             }
            }
            
-           console.log(`Calculating param[${param}] - SCORE = ${paramScore}`)
            score += paramScore
-       });
-
+        });
+        
+        console.log(`\n\nFINAL - SCORE = ${score}\n\n`)
        return score
     }
 
