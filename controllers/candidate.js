@@ -1,6 +1,39 @@
 const Candidate = require('../models/candidate')
 const TextUtility = require('../helpers/textProcessing')
 
+const dummy = {
+    name: 'Tyas Kokasih',
+    // linkedinURL: "https://www.linkedin.com/in/tyas-kokasih-860ab153/",
+    profile: {
+        currentPosition: "Software Engineer at Gemalto",
+        about: `Software engineer with experience in Eclipse RCP framework (Java) and test automation in HP QTP / UFT. A passionate and fast learner. Focused mainly in managing information complexity.
+
+        A team player and loves to be part to build knowledge-sharing culture. Interested in software development and management process as one form of information complexity. Also interested in general business strategy and administration, economy and public policy for the same reason.`,
+        workExperience: [`Part of scrum team to maintain a suite of internal perso modelling applications built on top of Eclipse RCP framework (Java).
+        * Data Personalization modelling (Personalization data, e.g. cryptographic keys, loaded into SIM card, IoT connectivity module, eSIM, etc.)
+        * Graphical Personalization modelling (SIM card, SMD)
+        * Logistic label modelling and printing (box labelling, packing list/delivery note, shipping manifest)
+        
+        Additional responsibilities:
+        * University Relation Ambassador for NTU (2018 - present)
+        * Configuration Management Officer for MKS Source/Integrity, Mercurial/Git/RhodeCode
+        * Internal trainer for HP QTP / UFT - HP QC (ends 2018 H1)
+        
+        Framework: OSGi, Eclipse RCP, JFace, SWT, AWT
+        Build: Ant+PDE, Maven+Tycho, Jenkins pipeline, NSIS
+        SCM (admin+support): MKS Source, Mercurial/Git+RhodeCode
+        Issue Tracker (admin+support): MKS Integrity, Redmine, JIRA
+        Others: XML, XSL, XSL-FO, XSD, Python, Groovy, Visual Laser Marker`,
+        `Create, update, execute and automate tests with HP QC - QTP / UFT 
+        * Validation software development artifact from requirement to documentation`
+    ],
+        recommendations: [``],
+        educations: [`Nanyang Technological University
+        Bachelor of Science, Physics`],
+    },
+}
+
+
 class CandidateController {
     static async findAll(req, res) {
         let list;
@@ -45,9 +78,20 @@ class CandidateController {
             educations: ["", ""] (optional params)
         */
 
-        // TODO: will call scrapping
-        // newData = scrapping_method();
-        // newData.profile = helper.cleanCandidateProfile(newData.profile)
+        //preprocess DUMMY data
+        newData = {profile: {}}
+        newData.name = dummy.name
+        newData.linkedinURL = linkedinLink
+        newData.profile.about = TextUtility.cleanInput(dummy.profile.about)
+        newData.profile.workExperience = dummy.profile.workExperience.map(x => {
+            return TextUtility.cleanInput(x)
+        })
+        newData.profile.recommendations = dummy.profile.recommendations.map(x => {
+            return TextUtility.cleanInput(x)
+        })
+        newData.profile.educations = dummy.profile.educations.map(x => {
+            return TextUtility.cleanInput(x)
+        })
 
         try {
             created = await Candidate.create(newData);
