@@ -2,10 +2,9 @@ const mongoose = require('mongoose')
 const Schema = mongoose.Schema
 
 let candidateSchema = new Schema({
-    firstname: String,
-    lastname: {
+    name: {
         type: String,
-        required: [true, 'Last name is required']
+        required: [true, 'Name is required']
     },
     /**
      * profile will have object with several paramaters :
@@ -41,7 +40,6 @@ let candidateSchema = new Schema({
     },
     email: {
         type: String,
-        required: true,
         validate: [{
             validator: function (val) {
             var emailRegex = /^([\w-\.]+@([\w-]+\.)+[\w-]{2,4})?$/;
@@ -49,10 +47,6 @@ let candidateSchema = new Schema({
             },
             msg: 'Must be valid email format!'
         }]
-    },
-    score: {
-        type: Number,
-        default: 0.0,
     },
     user: {
         type: Schema.Types.ObjectId,
