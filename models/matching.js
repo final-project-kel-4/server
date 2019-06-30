@@ -9,7 +9,8 @@ let matchingSchema = new Schema({
     },
     items: [{
         type: Schema.Types.ObjectId,
-        ref: 'MatchingItem' //MatchingItem = {candidate: ID, score: Number}
+        ref: 'MatchingItem', //MatchingItem = {candidate: ID, score: Number}
+        default: []
     }],
     createdat: {
         type: Date,
