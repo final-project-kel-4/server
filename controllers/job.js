@@ -7,6 +7,11 @@ const modelMatchingItem = require('../models/matchingitem')
 const modelMatching = require('../models/matching')
 const {scrapProfile} = require('../helpers/linkedin-scrapper/index')
 
+let auth = {
+    email: 'prasetio017@gmail.com',
+    password: 'prasetio017'
+   }
+
 class JobController {
     static async findAll(req, res) {
         let list;
@@ -105,59 +110,63 @@ class JobController {
     }
 
     static async addCandidate(req, res){
-        let newData, linkedinLink = req.body.linkedin
-        let created;
+        let counter = 0
 
-        console.log(req.body);
-        
-        newData = await scrapProfile(linkedinLink)
-        console.log(newData);
-        
-        // /**
-        //  * property profile of Candidate must have following attributes:
-        //     currentPosition: "",
-        //     about: "",
-        //     workExperience: ["", ""],
-        //     recommendations: ["", ""]
-        //     educations: ["", ""] (optional params)
-        // */
+        let candidates = req.body.linkedin.split('\n')
 
-        // //preprocess DUMMY data
-        // newData = initModelData(newData)
-        // newData.user = req.user._id
+        await candidates.map(async el=>{
+            let candidate = await modelCandidate.findOne({linkedinURL: el})
 
-        // try {
-        //     created = await Candidate.create(newData);
-        //     if(created) {
-        //         res.status(201).json(created)
-        //     }
-        //     else {
-        //         throw Error("Error creating data")
-        //     }
-        // }
-        // catch(err) {
-        //     console.log("ERR - Candidate.create =>\n", err);
-        //     res.status(500).json(err)
-        // }
+            if(candidate){
+                let newItem = await modelMatchingItem.create({candidate: candidate._id})
+                
+                await modelMatching.findOneAndUpdate({job: req.body.jobId}, {$push: {items: newItem._id}}, {new:true})
+                counter+=1
+            }else{
+                let resultScrap = await scrapProfile(el, {auth:auth})
+                let newData = initModelData(resultScrap)
+
+                newData.linkedinURL = el
+
+                let newCandidate = await modelCandidate.create(newData) 
+                let newItem = await modelMatchingItem.create({candidate: newCandidate._id})
+                
+                await modelMatching.findOneAndUpdate({job: req.body.jobId}, {$push: {items: newItem._id}}, {new:true})
+                counter+=1
+            }
+            
+            if(counter>=candidates.length) {
+                let result = await modelMatching.findOne({job: req.body.jobId}).populate({path:'items', populate: {path: 'candidate', model: 'Candidate'}});
+                console.log('result==========', result);
+                
+                res.status(201).json(result)
+            }
+        })
     }
 }
 
 const initModelData = (rawData) => {
     let newData = {profile: {}}
         
-    // newData.name = dummy.name
+
     newData.name = rawData.name
-    newData.linkedinURL = rawData.linkedinLink
-    newData.profile.currentPosition = rawData.profile.currentPosition
-    newData.profile.about = TextUtility.cleanInput(rawData.profile.about)
-    newData.profile.workExperience = rawData.profile.workExperience.map(x => {
-        return TextUtility.cleanInput(x)
+    newData.photo = rawData.photo
+    newData.profile.currentPosition = rawData.currentJob
+    newData.profile.about = rawData.about ? TextUtility.cleanInput(rawData.about) : ""
+    newData.profile.workExperience = rawData.experience.map(x => {
+        let exp =""
+        if(Array.isArray(x.position)){
+            x.position.forEach(el=>{
+                exp += (el.name +" "+ el.description+ " ")
+            })
+        }else{
+            exp += x.name+ " "+x.description
+        }
+        
+        return TextUtility.cleanInput(exp)
     })
-    newData.profile.recommendations = rawData.profile.recommendations.map(x => {
-        return TextUtility.cleanInput(x)
-    })
-    newData.profile.educations = rawData.profile.educations.map(x => {
-        return TextUtility.cleanInput(x)
+    newData.profile.educations = rawData.education.map(x => {
+        return TextUtility.cleanInput(x.field)
     })
 
     return newData
