@@ -5,6 +5,7 @@ const Matching = require('../models/matching')
 const modelCandidate = require('../models/candidate')
 const modelMatchingItem = require('../models/matchingitem')
 const modelMatching = require('../models/matching')
+const {scrapProfile} = require('../helpers/linkedin-scrapper/index')
 
 class JobController {
     static async findAll(req, res) {
@@ -106,9 +107,63 @@ class JobController {
         return data
     }
 
-    static addCandidate(req, res){
+    static async addCandidate(req, res){
+        let newData, linkedinLink = req.body.linkedin
+        let created;
 
+        console.log(req.body);
+        
+        newData = await scrapProfile(linkedinLink)
+        console.log(newData);
+        
+        // /**
+        //  * property profile of Candidate must have following attributes:
+        //     currentPosition: "",
+        //     about: "",
+        //     workExperience: ["", ""],
+        //     recommendations: ["", ""]
+        //     educations: ["", ""] (optional params)
+        // */
+
+        // //preprocess DUMMY data
+        // newData = initModelData(newData)
+        // newData.user = req.user._id
+
+        // try {
+        //     created = await Candidate.create(newData);
+        //     if(created) {
+        //         res.status(201).json(created)
+        //     }
+        //     else {
+        //         throw Error("Error creating data")
+        //     }
+        // }
+        // catch(err) {
+        //     console.log("ERR - Candidate.create =>\n", err);
+        //     res.status(500).json(err)
+        // }
     }
+}
+
+const initModelData = (rawData) => {
+    let newData = {profile: {}}
+        
+    // newData.name = dummy.name
+    newData.name = rawData.name
+    newData.linkedinURL = rawData.linkedinLink
+    newData.profile.currentPosition = rawData.profile.currentPosition
+    newData.profile.about = TextUtility.cleanInput(rawData.profile.about)
+    newData.profile.workExperience = rawData.profile.workExperience.map(x => {
+        return TextUtility.cleanInput(x)
+    })
+    newData.profile.recommendations = rawData.profile.recommendations.map(x => {
+        return TextUtility.cleanInput(x)
+    })
+    newData.profile.educations = rawData.profile.educations.map(x => {
+        return TextUtility.cleanInput(x)
+    })
+
+    return newData
 }
 
 module.exports = JobController
