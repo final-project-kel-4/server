@@ -58,11 +58,8 @@ class JobController {
             created = await Job.create(newData);
 
             if(created) {
-                console.log(created);
-                
                 //create Matching object (1 to 1 with Job)
-                matching = await Matching.create({job: created._id, user: req.user})
-                console.log(matching);
+                matching = await Matching.create({job: created._id, user: req.user, items: []})
                 
                 res.status(201).json(created)
             }
