@@ -7,8 +7,8 @@ const modelMatchingItem = require('../models/matchingitem')
 const modelMatching = require('../models/matching')
 
 let auth = {
-    email: 'prasetio017@gmail.com',
-    password: 'prasetio017'
+    email: '89.andre@gmail.com',
+    password: 'affan890111'
    }
 
 class JobController {
