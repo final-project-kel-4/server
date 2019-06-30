@@ -181,6 +181,11 @@ class CandidateController {
             res.status(500).json(err)
         }
     }
+
+    static refresh(req, res) {
+        //TODO: call scrapProfile and update candidate model
+    }
+
 }
 
 const initModelData = (rawData) => {
