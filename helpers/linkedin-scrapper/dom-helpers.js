@@ -1,3 +1,5 @@
+/* istanbul ignore file */
+
 function scrollToBottom() {
   return new Promise(resolve => {
     const distance = 100

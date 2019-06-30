@@ -1,3 +1,5 @@
+/* istanbul ignore file */
+
 const puppeteer = require('puppeteer')
 
 const jobQueries = require('./queries').job
