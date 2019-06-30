@@ -8,8 +8,8 @@ const modelMatching = require('../models/matching')
 const {scrapProfile} = require('../helpers/linkedin-scrapper/index')
 
 let auth = {
-    email: 'prasetio017@gmail.com',
-    password: 'prasetio017'
+    email: '89.andre@gmail.com',
+    password: 'affan890111'
    }
 
 class JobController {
