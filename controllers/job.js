@@ -2,6 +2,9 @@ const Job = require('../models/job')
 const TextUtility = require('../helpers/textProcessing')
 const { scrapJob } = require('../helpers/linkedin-scrapper/index')
 const Matching = require('../models/matching')
+const modelCandidate = require('../models/candidate')
+const modelMatchingItem = require('../models/matchingItems')
+const modelMatching = require('../models/matching')
 
 class JobController {
     static async findAll(req, res) {
@@ -22,8 +25,8 @@ class JobController {
         try {
             data = await Job.findOne({ _id: id });
             if (data) {
-                let matching = Matching.findOne({linkedinURL: data.linkedinURL })
-                res.status(200).json({...data, matching: matching._id})
+                let matching = await Matching.findOne({job: data._id })
+                res.status(200).json({...data.toObject(), matching: matching._id})
             }
             else {
                 res.status(404).json("Job not found")
@@ -54,8 +57,12 @@ class JobController {
             created = await Job.create(newData);
 
             if(created) {
+                console.log(created);
+                
                 //create Matching object (1 to 1 with Job)
                 matching = await Matching.create({job: created._id, user: req.user})
+                console.log(matching);
+                
                 res.status(201).json(created)
             }
             else {
