@@ -182,8 +182,29 @@ class CandidateController {
         }
     }
 
-    static refresh(req, res) {
-        //TODO: call scrapProfile and update candidate model
+    static async refresh(req, res) {
+        let candidate, scrapData
+
+        try {
+            // UNCOMMENT lines below once scrapProfile is ready
+            //TODO: call scrapProfile and update candidate model
+            /* candidate = await Candidate.findOne({_id: req.params.id})
+    
+            scrapData = await scrapProfile(candidate.linkedinURL)
+            scrapData = initModelData(scrapData)
+            candidate = await Candidate.findOneAndUpdate({_id: req.params.id}, {profile: scrapData.profile }, {new: true});
+    
+            if(!candidate) throw Error("Error during Candidate update")
+
+            res.status(200).json(candidate) */
+            
+            res.status(200).json("dummy refresh")
+        }
+        catch(err) {
+            console.log("ERR - Candidate.update =>\n", err);
+            res.status(500).json(err)
+        }
+
     }
 
 }
