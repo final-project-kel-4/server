@@ -1,6 +1,6 @@
 const Job = require('../models/job')
 const TextUtility = require('../helpers/textProcessing')
-const { scrapJobByUrl } = require('../helpers/linkedin-scrapper')
+const { scrapJob } = require('../helpers/linkedin-scrapper/index')
 
 class JobController {
     static async findAll(req, res) {
@@ -37,7 +37,7 @@ class JobController {
 
         let newData, linkedinLink = req.body.linkedin
         let created, scrapJobData;
-        scrapJobData = await scrapJobByUrl(linkedinLink);
+        scrapJobData = await scrapJob(linkedinLink);
 
         try {
             if(!scrapJobData) {
@@ -85,11 +85,11 @@ class JobController {
     static initJobData(scrapData) {
         let data = {}
         
-        data.title = scrapData.jobTitle
+        data.title = scrapData.title
         data.company = scrapData.company
-        data.rawHtml = scrapData.rawHtml
-        data.originalDescription = scrapData.rawText
-        data.cleanDescription = TextUtility.cleanInput(scrapData.rawText);
+        data.rawHtml = scrapData.description.html
+        data.originalDescription = scrapData.description.text
+        data.cleanDescription = TextUtility.cleanInput(scrapData.description.text);
 
         return data
     }

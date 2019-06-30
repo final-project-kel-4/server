@@ -10,3 +10,5 @@ router.get('/:id', matchController.findOne)
 router.get('/:id/refresh', matchController.recompare)
 
 module.exports = router
+
+//create end point addcandidate
