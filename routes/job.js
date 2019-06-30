@@ -8,6 +8,7 @@ router.use('/', authenticate)
 router.get('/', jobController.findAll)
 router.get('/:id', authorizeJob, jobController.findOne)
 router.post('/', jobController.create)
+router.post('/addCandidate', jobController.addCandidate)
 router.delete('/:id', authorizeJob, jobController.delete)
 
 module.exports = router

@@ -98,6 +98,10 @@ class JobController {
 
         return data
     }
+
+    static addCandidate(req, res){
+        
+    }
 }
 
 module.exports = JobController
