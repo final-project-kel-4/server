@@ -1,3 +1,5 @@
+/* istanbul ignore file */
+
 const job = {
   company: {
     logo: 'section.topcard img.company-logo',

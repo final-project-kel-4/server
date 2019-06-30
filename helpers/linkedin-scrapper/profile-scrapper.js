@@ -1,3 +1,5 @@
+/* istanbul ignore file */
+
 const puppeteer = require('puppeteer')
 
 const profileQueries = require('./queries').profile
@@ -37,6 +39,7 @@ async function scrapProfile (url, options = { headless: true }) {
     }
   }, profileQueries)
   await page.waitFor(500)
+  pages[0].waitFor(1000).then(() => browser.close())
   return await page.evaluate((q) => {
     function isNull (el, msg) {
       if (el === null && typeof el === 'object') {
