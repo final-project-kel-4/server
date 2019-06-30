@@ -7,7 +7,8 @@
   "license": "MIT",
   "scripts": {
     "dev": "nodemon app.js",
-    "test": "nyc mocha --exit"
+    "test": "nyc mocha --exit --exclude test/scrapper.test.js",
+    "test-scrapper": "mocha --exit --grep 'Scrapper'"
   },
   "dependencies": {
     "@google-cloud/language": "^3.2.3",

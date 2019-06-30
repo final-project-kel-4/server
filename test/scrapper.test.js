@@ -7,7 +7,7 @@ chai.use(chaiHttp)
 
 const expect = chai.expect
 
-describe.only('Scrapper Tests', function () {
+describe('Scrapper Tests', function () {
   this.timeout(50000)
   describe('Job scrapper test', () => {
     it('should run', (done) => {
