@@ -5,6 +5,7 @@ const Match = require('../models/matching')
 const Job = require('../models/job')
 const Candidate = require('../models/candidate')
 const MatchingItem = require('../models/matchingitem')
+const ObjectId = require('mongoose').Types.ObjectId
 
 class MatchingController {
     static findAll(req, res) {
@@ -129,55 +130,47 @@ class MatchingController {
 
     }
 
-    static async refreshMatching(req, res) {
+    static async recompare(req, res) {
+        let matching, newMatching, matchingData, candidates = []
+        let jobId
         let matchingId = req.params.id
-        let matchingData
-
-        if(!id) {
-            res.status(400).json("Invalid ID")
-        }
-
-        //re-calculate the existing matching data
-        matchingData = await MatchingController.recompare(matchingId)
-
-        if(matchingData) {
-            res.status(200).json(matchingData)
-        }
-        else {
-            if(matchingData === "Invalid ID") {
-                res.status(404).json(matchingData)
-            }
-            else {
-                res.status(500).json('')
-            }
-        }
-    }
-
-    static async recompare(matchingId) {
-        let matching, matchingData, candidates = []
 
         try {
             // TODO - Perform recompare   
             // 1. Get the matching model
-            matching = await Match.findOne({_id: matchingId});
+            matching = await Match.findOne({_id: matchingId}).populate('items');
 
             if(!matching) return 'Invalid ID'
-            else if(matching.candidates && matching.candidates.length > 0) {
-                req.body.candidates.forEach(candidateId => {
-                    promises.push(Candidate.findOne({_id: candidateId}))
-                });
-                candidates = await Promise.all(promises)
+            else if(matching.items && matching.items.length > 0) {
+                jobId = matching.job;
+                candidates = matching.items.map(x => x.candidate)
 
                 //2. calculate rank
-                matchingData = stringSimilarity.findBestMatch(job, candidates)
-                return matchingData
+                matchingData = await MatchingController.matchCandidates(jobId, candidates);
+                if(!matchingData) {
+                    throw Error("Error calculating scores. Please try again")
+                }
+                
+                // update the latest score
+                matching.items.forEach(item => {
+                    let found = matchingData.find(x => x.candidate._id.toString() === item.candidate.toString());
+                    if(found) {
+                        item.score = found.score
+                    }
+                })
+
+                //populate the reference attributes
+                newMatching = await Match.findOneAndUpdate({_id: matchingId}, {updatedat: new Date, items: [...matching.items]}, {new: true}).populate({path: 'items', populate: { path: 'candidate', model: 'Candidate'}}).populate('job');
+
+                res.status(200).json(newMatching)
+            }
+            else {
+                throw Error("")
             }
         }
         catch(err) {
-            console.log("ERR - Matching::create \n", err);
-        }
-        finally {
-            return matchingData
+            console.log("\n\nERR - Matching::recompare \n", err);
+            res.status(500).json(err)
         }
     }
 }

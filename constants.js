@@ -7,5 +7,5 @@ module.exports = {
     about: 0.2,
     workExperience: 0.35,
     recommendations: 0.10,
-    educations: 0.5,
+    educations: 0.05,
 }

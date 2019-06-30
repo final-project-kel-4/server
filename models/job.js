@@ -2,7 +2,7 @@ const mongoose = require('mongoose')
 const Schema = mongoose.Schema
 
 let jobSchema = new Schema({
-    jobTitle: {
+    title: {
         type: String,
         required: [true, "Job title/position is required"]
     },
