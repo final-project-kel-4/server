@@ -3,7 +3,7 @@ const TextUtility = require('../helpers/textProcessing')
 const { scrapJob } = require('../helpers/linkedin-scrapper/index')
 const Matching = require('../models/matching')
 const modelCandidate = require('../models/candidate')
-const modelMatchingItem = require('../models/matchingItems')
+const modelMatchingItem = require('../models/matchingitem')
 const modelMatching = require('../models/matching')
 
 class JobController {
@@ -107,7 +107,7 @@ class JobController {
     }
 
     static addCandidate(req, res){
-        
+
     }
 }
 
