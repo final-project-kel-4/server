@@ -8,8 +8,8 @@ const modelMatching = require('../models/matching')
 const {scrapProfile} = require('../helpers/linkedin-scrapper/index')
 
 let auth = {
-    email: 'prasetio017@gmail.com',
-    password: 'prasetio017'
+    email: '89.andre@gmail.com',
+    password: 'affan890111'
    }
 
 class JobController {
@@ -111,14 +111,24 @@ class JobController {
 
     static async addCandidate(req, res){
         let counter = 0
-
-        let candidates = req.body.linkedin.split('\n')
+        let candidates = req.body.linkedin
+        console.log(req.body);
+        let matching = await Matching.findOne({job: req.body.jobId})
+        console.log("===== ", matching)
 
         await candidates.map(async el=>{
             let candidate = await modelCandidate.findOne({linkedinURL: el})
 
             if(candidate){
-                let newItem = await modelMatchingItem.create({candidate: candidate._id})
+                let newItem, currentItem
+                currentItem = matching.items.find(x => x.candidate.toString() === candidate._id);
+
+                if(currentItem) {
+                    newItem = await modelMatchingItem.findOne({_id: currentItem._id})
+                }
+                else {
+                    newItem = await modelMatchingItem.create({candidate: candidate._id})
+                }
                 
                 await modelMatching.findOneAndUpdate({job: req.body.jobId}, {$push: {items: newItem._id}}, {new:true})
                 counter+=1
