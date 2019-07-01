@@ -18,7 +18,9 @@ class TextAnalyzer {
         const [resultEntitySentiment] = await client.analyzeSentiment ({document});
         const entities = result.entities;
         console.log('Entities...', entities);
-        console.log('Entities Sentiment: ',resultEntitySentiment);
+
+        console.log('Entities Sentiment: ')
+        console.log(resultEntitySentiment);
 
         return entities
     }

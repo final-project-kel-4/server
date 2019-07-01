@@ -1,4 +1,8 @@
 .env
 node_modules
 .nyc_output
+<<<<<<< HEAD
 coverage
+=======
+keyfile.json
+>>>>>>> ignore keyfile
