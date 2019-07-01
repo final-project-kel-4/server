@@ -9,8 +9,8 @@ const {scrapProfile} = require('../helpers/linkedin-scrapper/index')
 const GoogleNLP = require('../helpers/google-nlp')
 
 let auth = {
-    email: '89.andre@gmail.com',
-    password: 'affan890111'
+    email: process.env.LINKEDIN_EMAIL,
+    password: process.env.LINKEDIN_PASSWORD
    }
 
 class JobController {
