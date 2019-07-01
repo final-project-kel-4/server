@@ -210,8 +210,8 @@ class CandidateController {
 
 }
 
-const initModelData = (rawData) => {
-    let newData = {profile: {}}
+const initModelData = async (rawData) => {
+    let newData = {profile: {}, entities: {}}
         
     // newData.name = dummy.name
     newData.name = rawData.name
@@ -237,6 +237,20 @@ const initModelData = (rawData) => {
             educations
         }
     */
+    newData.entities.currentPosition = await GoogleNLP.analyze(newData.profile.currentPosition)
+    newData.entities.about = await GoogleNLP.analyze(newData.profile.currentPosition)
+    newData.entities.currentPosition = await GoogleNLP.analyze(newData.profile.currentPosition)
+    newData.entities.workExperience = newData.profile.workExperience.map( async (x) => {
+        return await GoogleNLP.analyze(x)
+    })
+    newData.entities.recommendations = newData.profile.workExperience.map( async (x) => {
+        return await GoogleNLP.analyze(x)
+    })
+    newData.entities.educations = newData.profile.educations.map( async (x) => {
+        return await GoogleNLP.analyze(x)
+    })
+
+
     return newData
 }
 

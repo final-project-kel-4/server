@@ -21,6 +21,20 @@ let candidateSchema = new Schema({
         type: Object,
         default: {}
     },
+    /**
+     * entities object will contain same attributes as profile:
+     *  profile: {
+     *      currentPosition: [],
+     *      about: [],
+     *      workExperience: [ [], ... ],
+     *      recommendations: [ [], ... ],
+     *      educations: [ [], ...]
+     *  }
+     */
+    entities: {
+        type: Object,
+        default: {}
+    },
     originalProfile: {
         type: Object,
         default: {}

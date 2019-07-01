@@ -1,5 +1,6 @@
 const axios = require('axios')
 const language = require('@google-cloud/language');
+const MIN_SALIENCE = 0.2
 
 class TextAnalyzer {
     static async analyze(text) {
@@ -15,12 +16,21 @@ class TextAnalyzer {
 
         // Detects entities in the document
         const [result] = await client.analyzeEntities({document});
-        const [resultEntitySentiment] = await client.analyzeSentiment ({document});
-        const entities = result.entities;
-        console.log('Entities...', entities);
+        let entities = result.entities;
 
-        console.log('Entities Sentiment: ')
-        console.log(resultEntitySentiment);
+        entities = entities.filter(x => {
+            if(x.type !== 'NUMBER' && x.salience >= 0.002) 
+            {
+                return true
+            }
+            else {
+                return false
+            }
+        });
+
+        entities = entities.map(item => {
+            return {name: item.name, salience: item.salience}
+        })
 
         return entities
     }

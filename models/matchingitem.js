@@ -7,8 +7,8 @@ let matchingItemSchema = new Schema({
         required: [true, "Candidate is required"]
     },
     score: {
-        type: Number,
-        default: 0.0
+        type: Object,
+        default: {}
     }
 })
 

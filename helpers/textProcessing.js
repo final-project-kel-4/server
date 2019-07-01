@@ -1,9 +1,42 @@
 const sw = require('stopword');
 const COEFFICIENTS = require('../constants')
 const Similarity = require('string-similarity');
-const GoogleNLP = require('../helpers/google-nlp')
 
 class Utility {
+    static compareEntities(job, profile) {
+        let score = 0.0, paramScore = 0.0
+        let profileParams = [], jobEntities = job.map(x=> x.name).join(' '), profileEntities
+        profileParams = Object.keys(profile)
+
+        /*
+        profileParams.forEach(param => {
+            paramScore = 0.0
+            profileEntities = profile[param].map(x => x.name).join(' ')
+            paramScore = Similarity.compareTwoStrings(jobEntities, profileEntities)
+
+            console.log(`param (${param})\ndata: ${profileEntities}\n`)
+            console.log('Param Score -- ', paramScore, '\n\n');
+            score += paramScore
+        });
+        
+        score = score /(profileParams.length > 0 ? profileParams.length : 1)
+        */
+        
+        //method 2: concatenate all entities and compare similarity with job entities
+        profileEntities = []
+        profileParams.forEach(param => {
+            profile[param].map(x => {
+                profileEntities.push(x)
+            })
+        })
+        profileEntities = [...new Set(profileEntities)];
+
+        score = Similarity.compareTwoStrings(jobEntities, profileEntities.join(' '))
+
+        console.log(`\n\nFINAL SCORE  GoogleNLP = ${score}\n\n`)
+        return score
+    }
+
     static compareOneCandidate(job, profile) {
         /* 
         *   jobDescription - String 
@@ -23,18 +56,17 @@ class Utility {
 
            if(param === 'currentPosition') {
                paramScore = Similarity.compareTwoStrings(job.get("title"), profile[param])
-               gParamScore = GoogleNLP.analyze(job.get("title"), profile[param])
-                // console.log(`\nparam: ${param} | itemScore = (${paramScore}) | Coefficient = (${COEFFICIENTS[param]})`);
+                console.log(`\nparam: ${param} | itemScore = (${paramScore}) | Coefficient = (${COEFFICIENTS[param]})`);
                paramScore *= COEFFICIENTS[param]
            }
            else {
             if(typeof(profile[param]) === 'string') {
                 let rawScore = Similarity.compareTwoStrings(job.cleanDescription, profile[param])
-                // console.log('==============1',rawScore, param)
+                console.log('==============1',rawScore, param)
 
                 if(rawScore == NaN) rawScore = 0
                 paramScore = rawScore * COEFFICIENTS[param];
-                // console.log(`\nparam: ${param} | itemScore = (${rawScore}) | Coefficient = (${COEFFICIENTS[param]}) | totalScore: ${paramScore}`);
+                console.log(`\nparam: ${param} | itemScore = (${rawScore}) | Coefficient = (${COEFFICIENTS[param]}) | totalScore: ${paramScore}`);
              }
              else {
                  //for param that are array of strings (work experience, recommendations)
@@ -45,19 +77,19 @@ class Utility {
                      if(rawScore == NaN) rawScore = 0
                      paramScore += rawScore
                      
-                    //  console.log(`\nparam: ${param} | itemScore = (${rawScore}) | Coefficient = (${COEFFICIENTS[param]})`);
+                     console.log(`\nparam: ${param} | itemScore = (${rawScore}) | Coefficient = (${COEFFICIENTS[param]})`);
                  })
                  
                  
                  paramScore = (paramScore / ( (arr.length > 0 ? arr.length : 1) * 1.0)) * COEFFICIENTS[param];
-                //  console.log(`\nparam (${param}) total score = ${paramScore}\n`);
+                 console.log(`\nparam (${param}) total score = ${paramScore}\n`);
              }
            }
            
            score += paramScore
         });
         
-        console.log(`\n\nFINAL SCORE --- Text Similarity = ${score} ||  GoogleNLP = ${gScore}\n\n`)
+        console.log(`\n\nFINAL SCORE --- Text Similarity = ${score}\n\n`)
        return score
     }
 
