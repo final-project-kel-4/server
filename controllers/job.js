@@ -52,7 +52,7 @@ class JobController {
                 throw Error('Error scrapping the job link. Please try again.')
             }
             //init Job model data
-            newData = JobController.initJobData(scrapJobData)
+            newData = await JobController.initJobData(scrapJobData)
             newData.linkedinURL = linkedinLink;
             newData.user = req.user._id;
 
@@ -83,7 +83,7 @@ class JobController {
         }
     }
 
-    static initJobData(scrapData) {
+    static async initJobData(scrapData) {
         let data = {}
 
         data.title = scrapData.title
@@ -93,7 +93,7 @@ class JobController {
         data.cleanDescription = TextUtility.cleanInput(scrapData.description.text);
 
         //add entities extraction for each Job creation, using clened job description
-        data.entities = GoogleNLP.analyze(data.cleanDescription)
+        data.entities = await GoogleNLP.analyze(data.cleanDescription)
 
         return data
     }
@@ -122,9 +122,8 @@ class JobController {
                 }
                 counter+=1
             }else{
-                let resultScrap = await scrapper.scrapProfile(el, {auth:auth})
-                let newData = initModelData(resultScrap)
-
+                let resultScrap = await scrapProfile(el, {auth:auth})
+                let newData = await initModelData(resultScrap)
                 newData.linkedinURL = el
 
                 let newCandidate = await modelCandidate.create(newData)
@@ -142,8 +141,8 @@ class JobController {
     }
 }
 
-const initModelData = (rawData) => {
-    let newData = {profile: {}}
+const initModelData = async (rawData) => {
+    let newData = {profile: {}, entities: {}}
 
     newData.name = rawData.name
     newData.photo = rawData.photo
@@ -156,7 +155,7 @@ const initModelData = (rawData) => {
                 exp += (el.name +" "+ el.description+ " ")
             })
         }else{
-            exp += x.name+ " "+x.description
+            exp += x.position.name+ " "+x.position.description
         }
 
         return TextUtility.cleanInput(exp)
@@ -164,6 +163,25 @@ const initModelData = (rawData) => {
     newData.profile.educations = rawData.education.map(x => {
         return TextUtility.cleanInput(x.field)
     })
+
+
+    //get the NLP result / entities for candidate attributes
+    newData.entities.currentPosition = await GoogleNLP.analyze(newData.profile.currentPosition)
+    newData.entities.about = await GoogleNLP.analyze(newData.profile.currentPosition)
+    newData.entities.currentPosition = await GoogleNLP.analyze(newData.profile.currentPosition)
+
+    if(newData.profile.workExperience) {
+
+        result = await GoogleNLP.analyze(newData.profile.workExperience.join(' '))
+        newData.entities.experience = result
+    }
+    
+    if(newData.profile.educations) {
+        let result
+
+        result = await GoogleNLP.analyze(newData.profile.educations.join(' '))
+        newData.entities.educations = result
+    }
 
     return newData
 }

@@ -22,7 +22,7 @@ describe('Scrapper Tests', function () {
   })
   describe('Profile scrapper test', () => {
     it('should run', (done) => {
-      let profileUrl = 'https://www.linkedin.com/in/helenant/'
+      let profileUrl = 'https://www.linkedin.com/in/andresuchitra/'
       let auth = {
         email: 'prasetio017@gmail.com',
         password: 'prasetio017'
