@@ -6,7 +6,7 @@ const modelCandidate = require('../models/candidate')
 const modelMatchingItem = require('../models/matchingitem')
 const modelMatching = require('../models/matching')
 const {scrapProfile} = require('../helpers/linkedin-scrapper/index')
-const GoogleNLP = require('./google-nlp')
+const GoogleNLP = require('../helpers/google-nlp')
 
 let auth = {
     email: '89.andre@gmail.com',

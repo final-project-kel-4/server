@@ -1,6 +1,7 @@
 const sw = require('stopword');
 const COEFFICIENTS = require('../constants')
 const Similarity = require('string-similarity');
+const GoogleNLP = require('../helpers/google-nlp')
 
 class Utility {
     static compareOneCandidate(job, profile) {
