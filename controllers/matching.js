@@ -8,23 +8,6 @@ const MatchingItem = require('../models/matchingitem')
 const ObjectId = require('mongoose').Types.ObjectId
 
 class MatchingController {
-    static findAll(req, res) {
-        Match.find()
-            .populate({path: 'items', populate: {path: 'candidate', model: 'Candidate'}})
-            .then(data => {
-                if(data) {
-                     res.status(200).json(data)
-                }
-                else {
-                    res.status(404).json('Invalid Matching ID')
-                }
-            })
-            .catch(err => {
-                console.log(`ERR - MatchingController::findAll\n ${err}`);
-                res.status(500).json(err)
-            })
-    }
-
     static findOne(req, res) {
         Match.findOne({_id: req.params.id})
             .populate({path: 'items', populate: {path: 'candidate', model: 'Candidate'}})
@@ -42,50 +25,6 @@ class MatchingController {
             })
     }
 
-    static async create(req, res) {
-        let jobId = req.body.job, job
-        let candidates = req.body.candidates
-        let matchingData, newMatching, promises = [], matchingItems
-
-        try {
-            // TODO - Perform the matching/comparison
-            job = await Job.findOne({_id: jobId});
-
-            if(!job) {
-                throw Error('Invalid Job ID -> ' + jobId)
-            }
-
-            if(candidates && candidates.length > 0) {
-                
-                //calculate rank. matchingDat -> [{candidateId, score}, {candidateId, score}, ..]
-                matchingData = await MatchingController.matchCandidates(jobId, candidates);
-
-                if(!matchingData) {
-                    throw Error("Error calculating scores. Please try again")
-                }
-
-                matchingData.forEach(item => {
-                    promises.push(MatchingItem.create({candidate: item.candidate._id, score: item.score}))
-                })
-                matchingItems = await Promise.all(promises);
-                
-                //create the Matching model
-                newMatching = await Match.create({job: jobId, items: matchingItems});
-
-                //populate the reference attributes
-                newMatching = await Match.findOne({_id: newMatching._id}).populate({path: 'items', populate: { path: 'candidate', model: 'Candidate'}}).populate('job');
-
-                res.status(201).json(newMatching)
-            }
-            else {
-                res.status(400).json("Please select at least one candidate!")
-            }
-        }
-        catch(err) {
-            console.log("ERR - MatchingController::create \n", err);
-            res.status(500).json(err)
-        }
-    }
 
     static async matchCandidates(jobId, candidateIds) {
         let job, candidateResult = []
@@ -155,8 +94,6 @@ class MatchingController {
                 matching.items.forEach(item => {
                     let found = matchingData.find(x => x.candidate._id.toString() === item.candidate.toString());
                     
-                    console.log(found);
-                    
                     promises.push(MatchingItem.findOneAndUpdate({_id: item._id}, {score: found.score}, {new: true}))
                 })
 
@@ -166,9 +103,6 @@ class MatchingController {
                 newMatching = await Match.findOneAndUpdate({_id: matchingId}, {updatedat: new Date}, {new: true}).populate({path: 'items', populate: { path: 'candidate', model: 'Candidate'}}).populate('job');
                 
                 res.status(200).json(newMatching)
-            }
-            else {
-                throw Error("")
             }
         }
         catch(err) {

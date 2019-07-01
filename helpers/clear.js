@@ -10,15 +10,5 @@ module.exports =  {
           done();
         })
     }
-  },
-
-  job(done){
-    if (process.env.NODE_ENV === '_test') {
-      Job
-        .deleteMany({})
-        .then(function() {
-          done();
-        })
-    }
   }
 }

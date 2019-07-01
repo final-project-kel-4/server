@@ -22,42 +22,35 @@ class Utility {
 
            if(param === 'currentPosition') {
                paramScore = Similarity.compareTwoStrings(job.get("title"), profile[param])
-               console.log(`\nparam: ${param} | itemScore = (${paramScore}) | Coefficient = (${COEFFICIENTS[param]})`);
                paramScore *= COEFFICIENTS[param]
            }
            else {
             if(typeof(profile[param]) === 'string') {
                 let rawScore = Similarity.compareTwoStrings(job.cleanDescription, profile[param])
-                // console.log('==============1',rawScore, param)
 
                 if(rawScore == NaN) rawScore = 0
                 paramScore = rawScore * COEFFICIENTS[param];
-                console.log(`\nparam: ${param} | itemScore = (${rawScore}) | Coefficient = (${COEFFICIENTS[param]}) | totalScore: ${paramScore}`);
              }
              else {
                  //for param that are array of strings (work experience, recommendations)
                  let arr = profile[param]
                  let subScore = 0.0
-                 console.log(arr);
                  
                  arr.forEach(paramDesc => {
                      let rawScore = Similarity.compareTwoStrings(job.cleanDescription, paramDesc);
                      if(rawScore == NaN) rawScore = 0
                      paramScore += rawScore
                      
-                     console.log(`\nparam: ${param} | itemScore = (${rawScore}) | Coefficient = (${COEFFICIENTS[param]})`);
                  })
                  
                  
                  paramScore = (paramScore / ( (arr.length > 0 ? arr.length : 1) * 1.0)) * COEFFICIENTS[param];
-                 console.log(`\nparam (${param}) total score = ${paramScore}\n`);
              }
            }
            
            score += paramScore
         });
         
-        console.log(`\n\nFINAL - SCORE = ${score}\n\n`)
        return score
     }
 

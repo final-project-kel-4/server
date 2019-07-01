@@ -4,8 +4,6 @@ const authenticate = require('../middlewares/authenticate')
 
 router.use('/', authenticate)
 
-router.get('/', matchController.findAll)
-router.post('/', matchController.create)
 router.get('/:id', matchController.findOne)
 router.get('/:id/refresh', matchController.recompare)
 

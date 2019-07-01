@@ -2,18 +2,21 @@ const chai = require('chai')
 const chaiHttp = require('chai-http')
 const app = require('../app')
 const { user } = require('../helpers/clear')
+const modelUser = require('../models/user')
 
 chai.should()
 chai.use(chaiHttp)
 
 describe('User', function () {
+  let idCurrent
+  
   after(function (done) {
     user(done)
   });
   
   let newUser = {
-    name: 'tio',
-    email: 'tio@gmail.com',
+    name: 'prasetio',
+    email: 'prasetio@gmail.com',
     password: '123'
   }
   
@@ -49,6 +52,7 @@ describe('User', function () {
           res.body.should.have.property('password');
           res.body.password.should.be.a('string');
           res.body.password.should.not.equal(newUser.password);
+          idCurrent = res.body._id
           done();
         })
     })
