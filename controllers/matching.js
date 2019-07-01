@@ -155,6 +155,8 @@ class MatchingController {
                 matching.items.forEach(item => {
                     let found = matchingData.find(x => x.candidate._id.toString() === item.candidate.toString());
                     
+                    console.log(found);
+                    
                     promises.push(MatchingItem.findOneAndUpdate({_id: item._id}, {score: found.score}, {new: true}))
                 })
 
