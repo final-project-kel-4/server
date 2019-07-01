@@ -1,6 +1,6 @@
 const Candidate = require('../models/candidate')
 const TextUtility = require('../helpers/textProcessing')
-const GoogleNLP = require('./google-nlp')
+const GoogleNLP = require('../helpers/google-nlp')
 
 const dummy = {
     name: 'Dummy 1',
