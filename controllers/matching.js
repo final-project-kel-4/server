@@ -9,11 +9,11 @@ const ObjectId = require('mongoose').Types.ObjectId
 
 class MatchingController {
     static findOne(req, res) {
-        Match.findOne({_id: req.params.id})
-            .populate({path: 'items', populate: {path: 'candidate', model: 'Candidate'}})
+        Match.findOne({ _id: req.params.id })
+            .populate({ path: 'items', populate: { path: 'candidate', model: 'Candidate' } })
             .then(data => {
-                if(data) {
-                     res.status(200).json(data)
+                if (data) {
+                    res.status(200).json(data)
                 }
                 else {
                     res.status(404).json('Invalid Matching ID')
@@ -28,44 +28,38 @@ class MatchingController {
 
     static async matchCandidates(jobId, candidateIds) {
         let job, candidateResult = []
-        let candidates, promises =[];
+        let candidates, promises = [];
         let profile, score;
 
-        try {
-            job = await Job.findOne({_id: jobId});
-            
-            candidateIds.forEach(id => {
-                promises.push(Candidate.findOne({_id: id}))
-            });
-    
-            //get all candidate objects
-            candidates = await Promise.all(promises);
+        job = await Job.findOne({ _id: jobId });
 
-            //iterates all candidates' profile and compare the similarities
-            candidates.forEach(person => {
-                profile = person.profile;
-                score = TextUtility.compareOneCandidate(job, profile)
+        candidateIds.forEach(id => {
+            promises.push(Candidate.findOne({ _id: id }))
+        });
 
-                candidateResult.push({candidate: person, score})
-            })
+        //get all candidate objects
+        candidates = await Promise.all(promises);
 
-            //sort the result (highest score first)
-            candidateResult.sort((a,b) => {
-                if(a.score > b.score) {
-                    return -1
-                }
-                else if(a.score < b.score) {
-                    return 1
-                }
-                else return 0
-            })
+        //iterates all candidates' profile and compare the similarities
+        candidates.forEach(person => {
+            profile = person.profile;
+            score = TextUtility.compareOneCandidate(job, profile)
 
-            return candidateResult
-        }
-        catch(err) {
-            console.log("ERR - MatchingController::matchCandidates \n", err)
-            return null;
-        }
+            candidateResult.push({ candidate: person, score })
+        })
+
+        //sort the result (highest score first)
+        candidateResult.sort((a, b) => {
+            if (a.score > b.score) {
+                return -1
+            }
+            else if (a.score < b.score) {
+                return 1
+            }
+            else return 0
+        })
+
+        return candidateResult
 
     }
 
@@ -77,35 +71,32 @@ class MatchingController {
         try {
             // TODO - Perform recompare   
             // 1. Get the matching model
-            matching = await Match.findOne({_id: matchingId}).populate('items');
+            matching = await Match.findOne({ _id: matchingId }).populate('items');
 
-            if(!matching) return 'Invalid ID'
-            else if(matching.items && matching.items.length > 0) {
+            if (!matching) new Error('Invalid ID')
+            else if (matching.items && matching.items.length > 0) {
                 jobId = matching.job;
                 candidates = matching.items.map(x => x.candidate)
 
                 //2. calculate rank
                 matchingData = await MatchingController.matchCandidates(jobId, candidates);
-                if(!matchingData) {
-                    throw Error("Error calculating scores. Please try again")
-                }
-                
+
                 // update the latest score
                 matching.items.forEach(item => {
                     let found = matchingData.find(x => x.candidate._id.toString() === item.candidate.toString());
-                    
-                    promises.push(MatchingItem.findOneAndUpdate({_id: item._id}, {score: found.score}, {new: true}))
+
+                    promises.push(MatchingItem.findOneAndUpdate({ _id: item._id }, { score: found.score }, { new: true }))
                 })
 
                 await Promise.all(promises)
-                
+
                 //populate the reference attributes
-                newMatching = await Match.findOneAndUpdate({_id: matchingId}, {updatedat: new Date}, {new: true}).populate({path: 'items', populate: { path: 'candidate', model: 'Candidate'}}).populate('job');
-                
+                newMatching = await Match.findOneAndUpdate({ _id: matchingId }, { updatedat: new Date }, { new: true }).populate({ path: 'items', populate: { path: 'candidate', model: 'Candidate' } }).populate('job');
+
                 res.status(200).json(newMatching)
             }
         }
-        catch(err) {
+        catch (err) {
             console.log("\n\nERR - Matching::recompare \n", err);
             res.status(500).json(err)
         }
