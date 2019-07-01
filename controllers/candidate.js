@@ -1,5 +1,6 @@
 const Candidate = require('../models/candidate')
 const TextUtility = require('../helpers/textProcessing')
+const GoogleNLP = require('./google-nlp')
 
 const dummy = {
     name: 'Dummy 1',
@@ -227,6 +228,15 @@ const initModelData = (rawData) => {
         return TextUtility.cleanInput(x)
     })
 
+    /* add entities attribute, which contains same attributes as profile
+        entities {
+            currentPosition,
+            about,
+            workExperience,
+            recommendations,
+            educations
+        }
+    */
     return newData
 }
 

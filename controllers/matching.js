@@ -107,6 +107,7 @@ class MatchingController {
                 profile = person.profile;
                 score = TextUtility.compareOneCandidate(job, profile)
 
+                console.log(`score of candidate (${person.name}) = ${score}`);
                 candidateResult.push({candidate: person, score})
             })
 
@@ -154,9 +155,6 @@ class MatchingController {
                 // update the latest score
                 matching.items.forEach(item => {
                     let found = matchingData.find(x => x.candidate._id.toString() === item.candidate.toString());
-                    
-                    console.log(found);
-                    
                     promises.push(MatchingItem.findOneAndUpdate({_id: item._id}, {score: found.score}, {new: true}))
                 })
 
