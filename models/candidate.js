@@ -8,7 +8,7 @@ let candidateSchema = new Schema({
     },
     /**
      * profile will have object with several paramaters :
-     * 
+     *
      * profile: {
      *      currentPosition: "",
      *      about: "",
@@ -42,8 +42,8 @@ let candidateSchema = new Schema({
         type: String,
         validate: [{
             validator: function (val) {
-            var emailRegex = /^([\w-\.]+@([\w-]+\.)+[\w-]{2,4})?$/;
-            return emailRegex.test(email.text);     
+                var emailRegex = /^([\w-\.]+@([\w-]+\.)+[\w-]{2,4})?$/;
+                return emailRegex.test(val);
             },
             msg: 'Must be valid email format!'
         }]
