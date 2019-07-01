@@ -1,5 +1,11 @@
 const Candidate = require('../models/candidate')
 const TextUtility = require('../helpers/textProcessing')
+const {scrapProfile} = require('../helpers/linkedin-scrapper/index')
+
+let auth = {
+    email: 'prasetio017@gmail.com',
+    password: 'prasetio017'
+   }
 
 const dummy = {
     name: 'Dummy 1',
@@ -186,18 +192,15 @@ class CandidateController {
         let candidate, scrapData
 
         try {
-            // UNCOMMENT lines below once scrapProfile is ready
-            //TODO: call scrapProfile and update candidate model
-            /* candidate = await Candidate.findOne({_id: req.params.id})
-    
-            scrapData = await scrapProfile(candidate.linkedinURL)
+            candidate = await Candidate.findOne({_id: req.params.id})
+            console.log(candidate);
+            
+            scrapData = await scrapProfile(candidate.linkedinURL, {auth:auth})
             scrapData = initModelData(scrapData)
-            candidate = await Candidate.findOneAndUpdate({_id: req.params.id}, {profile: scrapData.profile }, {new: true});
+            candidate = await Candidate.findOneAndUpdate({_id: req.params.id}, scrapData, {new: true});
     
             if(!candidate) throw Error("Error during Candidate update")
 
-            res.status(200).json(candidate) */
-            
             res.status(200).json("dummy refresh")
         }
         catch(err) {
@@ -211,20 +214,24 @@ class CandidateController {
 
 const initModelData = (rawData) => {
     let newData = {profile: {}}
-        
-    // newData.name = dummy.name
+
     newData.name = rawData.name
-    newData.linkedinURL = rawData.linkedinLink
-    newData.profile.currentPosition = rawData.profile.currentPosition
-    newData.profile.about = TextUtility.cleanInput(rawData.profile.about)
-    newData.profile.workExperience = rawData.profile.workExperience.map(x => {
-        return TextUtility.cleanInput(x)
+    newData.photo = rawData.photo
+    newData.profile.currentPosition = rawData.currentJob
+    newData.profile.about = rawData.about ? TextUtility.cleanInput(rawData.about) : ""
+    newData.profile.workExperience = rawData.experience.map(x => {
+        let exp =""
+        if(Array.isArray(x.position)){
+            x.position.forEach(el=>{
+                exp += (el.name +" "+ el.description+ " ")
+            })
+        }else{
+            exp += x.name+ " "+x.description
+        }
+        return TextUtility.cleanInput(exp)
     })
-    newData.profile.recommendations = rawData.profile.recommendations.map(x => {
-        return TextUtility.cleanInput(x)
-    })
-    newData.profile.educations = rawData.profile.educations.map(x => {
-        return TextUtility.cleanInput(x)
+    newData.profile.educations = rawData.education.map(x => {
+        return TextUtility.cleanInput(x.field)
     })
 
     return newData

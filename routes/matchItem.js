@@ -1,10 +1,9 @@
 const router = require('express').Router()
-const matchController = require('../controllers/matching')
+const matchItemController = require('../controllers/matchingItem')
 const authenticate = require('../middlewares/authenticate')
 
 router.use('/', authenticate)
 
-router.get('/:id', matchController.findOne)
-router.get('/:id/refresh', matchController.recompare)
+router.delete('/:id', matchItemController.delete)
 
 module.exports = router

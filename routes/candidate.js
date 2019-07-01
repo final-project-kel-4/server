@@ -8,7 +8,7 @@ router.use('/', authenticate)
 router.get('/', candidate.findAll)
 router.get('/:id', candidate.findOne)
 router.post('/', candidate.create)
-router.get('/:id', candidate.refresh)
+router.get('/:id/refresh', candidate.refresh)
 router.delete('/:id', authorizeCandidate, candidate.delete)
 
 module.exports = router

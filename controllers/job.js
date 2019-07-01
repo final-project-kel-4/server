@@ -112,17 +112,18 @@ class JobController {
     static async addCandidate(req, res){
         let counter = 0
         let candidates = req.body.linkedin.split('\n')
-        let matching = await modelMatching.findOne({job:req.body.jobId}).populate('items')
+        let matching = await modelMatching.findOne({job:req.body.jobId}).populate({path:'items', populate: {path: 'candidate', model: 'Candidate'}});
 
         await candidates.map(async el=>{
             let candidate = await modelCandidate.findOne({linkedinURL: el})
 
+            //jika candidate sudah terdaftar
             if(candidate){
                 let newItem, currentItem
-                currentItem = matching.items.find(x => {                    
-                    let username = candidate.linkedinURL.substring(candidate.linkedinURL.indexOf('in/')+3).replace(/^[/ ]*(.*?)[/ ]*$/g, '$1');
-                    let newUsername = candidate.linkedinURL.substring(el.indexOf('in/')+3).replace(/^[/ ]*(.*?)[/ ]*$/g, '$1');
 
+                currentItem = matching.items.find(x => {
+                    let newUsername = candidate.linkedinURL.substring(candidate.linkedinURL.indexOf('in/')+3).replace(/^[/ ]*(.*?)[/ ]*$/g, '$1');
+                    let username = x.candidate.linkedinURL.substring(x.candidate.linkedinURL.indexOf('in/')+3).replace(/^[/ ]*(.*?)[/ ]*$/g, '$1');
                     if (username === newUsername) return true
                     else return false
                 });
@@ -133,6 +134,7 @@ class JobController {
                 }
                 counter+=1
             }else{
+                //jika candidate belum terdaftar
                 let resultScrap = await scrapProfile(el, {auth:auth})
                 let newData = initModelData(resultScrap)
 
