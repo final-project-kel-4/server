@@ -5,6 +5,8 @@ const Matching = require('../models/matching')
 const modelCandidate = require('../models/candidate')
 const modelMatchingItem = require('../models/matchingitem')
 const modelMatching = require('../models/matching')
+const {scrapProfile} = require('../helpers/linkedin-scrapper/index')
+const GoogleNLP = require('./google-nlp')
 
 let auth = {
     email: '89.andre@gmail.com',
@@ -89,6 +91,9 @@ class JobController {
         data.rawHtml = scrapData.description.html
         data.originalDescription = scrapData.description.text
         data.cleanDescription = TextUtility.cleanInput(scrapData.description.text);
+
+        //add entities extraction for each Job creation, using clened job description
+        data.entities = GoogleNLP.analyze(data.cleanDescription)
 
         return data
     }

@@ -1,11 +1,6 @@
 const Candidate = require('../models/candidate')
 const TextUtility = require('../helpers/textProcessing')
-const {scrapProfile} = require('../helpers/linkedin-scrapper/index')
-
-let auth = {
-    email: 'prasetio017@gmail.com',
-    password: 'prasetio017'
-   }
+const GoogleNLP = require('./google-nlp')
 
 const dummy = {
     name: 'Dummy 1',
@@ -234,6 +229,15 @@ const initModelData = (rawData) => {
         return TextUtility.cleanInput(x.field)
     })
 
+    /* add entities attribute, which contains same attributes as profile
+        entities {
+            currentPosition,
+            about,
+            workExperience,
+            recommendations,
+            educations
+        }
+    */
     return newData
 }
 
