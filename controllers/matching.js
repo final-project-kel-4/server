@@ -134,7 +134,7 @@ class MatchingController {
         let matching, newMatching, matchingData, candidates = []
         let jobId
         let matchingId = req.params.id
-
+        let promises = []
         try {
             // TODO - Perform recompare   
             // 1. Get the matching model
@@ -154,14 +154,15 @@ class MatchingController {
                 // update the latest score
                 matching.items.forEach(item => {
                     let found = matchingData.find(x => x.candidate._id.toString() === item.candidate.toString());
-                    if(found) {
-                        item.score = found.score
-                    }
+                    
+                    promises.push(MatchingItem.findOneAndUpdate({_id: item._id}, {score: found.score}, {new: true}))
                 })
 
+                await Promise.all(promises)
+                
                 //populate the reference attributes
-                newMatching = await Match.findOneAndUpdate({_id: matchingId}, {updatedat: new Date, items: [...matching.items]}, {new: true}).populate({path: 'items', populate: { path: 'candidate', model: 'Candidate'}}).populate('job');
-
+                newMatching = await Match.findOneAndUpdate({_id: matchingId}, {updatedat: new Date}, {new: true}).populate({path: 'items', populate: { path: 'candidate', model: 'Candidate'}}).populate('job');
+                
                 res.status(200).json(newMatching)
             }
             else {

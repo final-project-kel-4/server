@@ -111,24 +111,26 @@ class JobController {
 
     static async addCandidate(req, res){
         let counter = 0
-
         let candidates = req.body.linkedin.split('\n')
+        let matching = await modelMatching.findOne({job:req.body.jobId}).populate('items')
 
         await candidates.map(async el=>{
             let candidate = await modelCandidate.findOne({linkedinURL: el})
 
             if(candidate){
                 let newItem, currentItem
-                currentItem = matching.items.find(x => x.candidate.toString() === candidate._id);
+                currentItem = matching.items.find(x => {                    
+                    let username = candidate.linkedinURL.substring(candidate.linkedinURL.indexOf('in/')+3).replace(/^[/ ]*(.*?)[/ ]*$/g, '$1');
+                    let newUsername = candidate.linkedinURL.substring(el.indexOf('in/')+3).replace(/^[/ ]*(.*?)[/ ]*$/g, '$1');
 
-                if(currentItem) {
-                    newItem = await modelMatchingItem.findOne({_id: currentItem._id})
-                }
-                else {
+                    if (username === newUsername) return true
+                    else return false
+                });
+
+                if(!currentItem) {
                     newItem = await modelMatchingItem.create({candidate: candidate._id})
+                    await modelMatching.findOneAndUpdate({job: req.body.jobId}, {$push: {items: newItem._id}}, {new:true})
                 }
-                
-                await modelMatching.findOneAndUpdate({job: req.body.jobId}, {$push: {items: newItem._id}}, {new:true})
                 counter+=1
             }else{
                 let resultScrap = await scrapProfile(el, {auth:auth})
@@ -145,8 +147,6 @@ class JobController {
             
             if(counter>=candidates.length) {
                 let result = await modelMatching.findOne({job: req.body.jobId}).populate({path:'items', populate: {path: 'candidate', model: 'Candidate'}});
-                console.log('result==========', result);
-                
                 res.status(201).json(result)
             }
         })
