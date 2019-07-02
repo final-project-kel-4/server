@@ -107,10 +107,12 @@ class JobController {
                 let newItem, currentItem
                 currentItem = matching.items.find(x => {
                     let username = candidate.linkedinURL.substring(candidate.linkedinURL.indexOf('in/')+3).replace(/^[/ ]*(.*?)[/ ]*$/g, '$1');
-                    let newUsername = candidate.linkedinURL.substring(el.indexOf('in/')+3).replace(/^[/ ]*(.*?)[/ ]*$/g, '$1');
+                    let newUsername = x.candidate.linkedinURL.substring(x.candidate.linkedinURL.indexOf('in/')+3).replace(/^[/ ]*(.*?)[/ ]*$/g, '$1');
 
                     return username === newUsername
                 });
+
+                console.log(candidate, currentItem);
 
                 if(!currentItem) {
                     newItem = await modelMatchingItem.create({candidate: candidate._id})
