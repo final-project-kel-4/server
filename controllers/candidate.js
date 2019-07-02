@@ -1,11 +1,7 @@
 const Candidate = require('../models/candidate')
 const TextUtility = require('../helpers/textProcessing')
 const scrapper = require('../helpers/linkedin-scrapper/index')
-
-let auth = {
-    email: 'prasetio017@gmail.com',
-    password: 'prasetio017'
-   }
+const GoogleNLP = require('../helpers/google-nlp')
 
 class CandidateController {
     static async refresh(req, res) {
@@ -28,9 +24,10 @@ class CandidateController {
 
 }
 
-const initModelData = (rawData) => {
-    let newData = {profile: {}}
-
+const initModelData = async (rawData) => {
+    let newData = {profile: {}, entities: {}}
+        
+    // newData.name = dummy.name
     newData.name = rawData.name
     newData.photo = rawData.photo
     newData.profile.currentPosition = rawData.currentJob
@@ -49,6 +46,52 @@ const initModelData = (rawData) => {
     newData.profile.educations = rawData.education.map(x => {
         return TextUtility.cleanInput(x.field)
     })
+
+    /* add entities attribute, which contains same attributes as profile
+        entities {
+            currentPosition,
+            about,
+            workExperience,
+            recommendations,
+            educations
+        }
+    */
+    newData.entities.currentPosition = await GoogleNLP.analyze(newData.profile.currentPosition)
+    newData.entities.about = await GoogleNLP.analyze(newData.profile.currentPosition)
+    newData.entities.currentPosition = await GoogleNLP.analyze(newData.profile.currentPosition)
+    newData.entities.workExperience = newData.profile.workExperience.map( async (x) => {
+        return await GoogleNLP.analyze(x)
+    })
+    newData.entities.recommendations = newData.profile.workExperience.map( async (x) => {
+        return await GoogleNLP.analyze(x)
+    })
+    newData.entities.educations = newData.profile.educations.map( async (x) => {
+        return await GoogleNLP.analyze(x)
+    })
+
+
+    /* add entities attribute, which contains same attributes as profile
+        entities {
+            currentPosition,
+            about,
+            workExperience,
+            recommendations,
+            educations
+        }
+    */
+    newData.entities.currentPosition = await GoogleNLP.analyze(newData.profile.currentPosition)
+    newData.entities.about = await GoogleNLP.analyze(newData.profile.currentPosition)
+    newData.entities.currentPosition = await GoogleNLP.analyze(newData.profile.currentPosition)
+    newData.entities.workExperience = newData.profile.workExperience.map( async (x) => {
+        return await GoogleNLP.analyze(x)
+    })
+    newData.entities.recommendations = newData.profile.workExperience.map( async (x) => {
+        return await GoogleNLP.analyze(x)
+    })
+    newData.entities.educations = newData.profile.educations.map( async (x) => {
+        return await GoogleNLP.analyze(x)
+    })
+
 
     return newData
 }

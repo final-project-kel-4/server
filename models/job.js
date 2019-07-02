@@ -32,7 +32,11 @@ let jobSchema = new Schema({
     user: {
         type: Schema.Types.ObjectId,
         ref: 'User'
-    }
+    },
+    entities: [{
+        type: Object,
+        default: []
+    }]
 })
 
 let Job = mongoose.model('Job', jobSchema)

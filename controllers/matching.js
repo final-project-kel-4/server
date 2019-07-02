@@ -1,6 +1,7 @@
 const axios = require('axios')
 const stringSimilarity = require('string-similarity');
 const TextUtility = require('../helpers/textProcessing')
+const scoreSort = require('../helpers/sort')
 const Match = require('../models/matching')
 const Job = require('../models/job')
 const Candidate = require('../models/candidate')
@@ -25,41 +26,41 @@ class MatchingController {
             })
     }
 
-
     static async matchCandidates(jobId, candidateIds) {
         let job, candidateResult = []
-        let candidates, promises = [];
-        let profile, score;
+        let candidates, promises =[];
+        let profile, score = {similarity: 0.0, google: 0.0};
 
-        job = await Job.findOne({ _id: jobId });
+        try {
+            job = await Job.findOne({_id: jobId});
+            
+            candidateIds.forEach(id => {
+                promises.push(Candidate.findOne({_id: id}))
+            });
+    
+            //get all candidate objects
+            candidates = await Promise.all(promises);
 
-        candidateIds.forEach(id => {
-            promises.push(Candidate.findOne({ _id: id }))
-        });
+            //iterates all candidates' profile and compare the similarities
+            candidates.forEach(person => {
+                profile = person.profile;
+                score.similarity = TextUtility.compareOneCandidate(job, profile)
+                score.google = TextUtility.compareEntities(job.entities, person.entities)
+                score.total = (score.similarity * 0.2 + score.google * 0.8);
 
-        //get all candidate objects
-        candidates = await Promise.all(promises);
+                console.log(`score of candidate (${person.name}) = `,score);
+                candidateResult.push({candidate: person, score: score.total})
+            })
 
-        //iterates all candidates' profile and compare the similarities
-        candidates.forEach(person => {
-            profile = person.profile;
-            score = TextUtility.compareOneCandidate(job, profile)
+            //sort the result (highest score first)
+            scoreSort(candidateResult)
 
-            candidateResult.push({ candidate: person, score })
-        })
-
-        //sort the result (highest score first)
-        candidateResult.sort((a, b) => {
-            if (a.score > b.score) {
-                return -1
-            }
-            else if (a.score < b.score) {
-                return 1
-            }
-            else return 0
-        })
-
-        return candidateResult
+            return candidateResult
+        }
+        catch(err) {
+            console.log("ERR - MatchingController::matchCandidates \n", err)
+            return null;
+        }
 
     }
 

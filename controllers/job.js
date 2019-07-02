@@ -5,10 +5,11 @@ const Matching = require('../models/matching')
 const modelCandidate = require('../models/candidate')
 const modelMatchingItem = require('../models/matchingitem')
 const modelMatching = require('../models/matching')
+const GoogleNLP = require('../helpers/google-nlp')
 
 let auth = {
-    email: 'prasetio017@gmail.com',
-    password: 'prasetio017'
+    email: process.env.LINKEDIN_EMAIL,
+    password: process.env.LINKEDIN_PASSWORD
    }
 
 class JobController {
@@ -41,14 +42,15 @@ class JobController {
         let newData, linkedinLink = req.body.linkedin
         let created, scrapJobData
         let matching;
-        scrapJobData = await scrapper.scrapJob(linkedinLink);
-
+        
         try {
+            scrapJobData = await scrapper.scrapJob(linkedinLink);
             if(!scrapJobData) {
                 throw Error('Error scrapping the job link. Please try again.')
             }
+            console.log(scrapJobData);
             //init Job model data
-            newData = JobController.initJobData(scrapJobData)
+            newData = await JobController.initJobData(scrapJobData)
             newData.linkedinURL = linkedinLink;
             newData.user = req.user._id;
 
@@ -77,7 +79,7 @@ class JobController {
         }
     }
 
-    static initJobData(scrapData) {
+    static async initJobData(scrapData) {
         let data = {}
 
         data.title = scrapData.title
@@ -85,6 +87,9 @@ class JobController {
         data.rawHtml = scrapData.description.html
         data.originalDescription = scrapData.description.text
         data.cleanDescription = TextUtility.cleanInput(scrapData.description.text);
+
+        //add entities extraction for each Job creation, using clened job description
+        data.entities = await GoogleNLP.analyze(data.cleanDescription)
 
         return data
     }
@@ -114,8 +119,7 @@ class JobController {
                 counter+=1
             }else{
                 let resultScrap = await scrapper.scrapProfile(el, {auth:auth})
-                let newData = initModelData(resultScrap)
-
+                let newData = await initModelData(resultScrap)
                 newData.linkedinURL = el
 
                 let newCandidate = await modelCandidate.create(newData)
@@ -133,8 +137,8 @@ class JobController {
     }
 }
 
-const initModelData = (rawData) => {
-    let newData = {profile: {}}
+const initModelData = async (rawData) => {
+    let newData = {profile: {}, entities: {}}
 
     newData.name = rawData.name
     newData.photo = rawData.photo
@@ -147,7 +151,7 @@ const initModelData = (rawData) => {
                 exp += (el.name +" "+ el.description+ " ")
             })
         }else{
-            exp += x.name+ " "+x.description
+            exp += x.position.name+ " "+x.position.description
         }
 
         return TextUtility.cleanInput(exp)
@@ -155,6 +159,25 @@ const initModelData = (rawData) => {
     newData.profile.educations = rawData.education.map(x => {
         return TextUtility.cleanInput(x.field)
     })
+
+
+    //get the NLP result / entities for candidate attributes
+    newData.entities.currentPosition = await GoogleNLP.analyze(newData.profile.currentPosition)
+    newData.entities.about = await GoogleNLP.analyze(newData.profile.currentPosition)
+    newData.entities.currentPosition = await GoogleNLP.analyze(newData.profile.currentPosition)
+
+    if(newData.profile.workExperience) {
+
+        result = await GoogleNLP.analyze(newData.profile.workExperience.join(' '))
+        newData.entities.experience = result
+    }
+    
+    if(newData.profile.educations) {
+        let result
+
+        result = await GoogleNLP.analyze(newData.profile.educations.join(' '))
+        newData.entities.educations = result
+    }
 
     return newData
 }
