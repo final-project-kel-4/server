@@ -1,6 +1,6 @@
 const axios = require('axios')
 const language = require('@google-cloud/language');
-const MIN_SALIENCE = 0.2
+const MIN_SALIENCE = 0.3
 
 class TextAnalyzer {
     static async analyze(text) {

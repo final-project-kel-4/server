@@ -2,24 +2,52 @@ const sw = require('stopword');
 const COEFFICIENTS = require('../constants')
 const Similarity = require('string-similarity');
 
+const scoreWeight = {
+    currentPosition: 0.2,
+    about: 0.1,
+    experience: 0.3,
+    educations: 0.1,
+    skill: 0.3
+}
+
 class Utility {
     static compareEntities(job, profile) {
-        let score = 0.0, freqScore = 0.0
-        let profileParams = [], jobEntities = job.map(x => x.name), profileEntities
+        let totalScore = 0.0, freqScore = 0.0
+        let profileParams = [], jobEntities = job.entities.map(x => x.name.trim()), profileEntities
+        let scoreDetails = {
+            currentPosition: 0.0,
+            about: 0.0,
+            experience: 0.0,
+            educations: 0.0,
+            skill: 0.0
+        }
         profileParams = Object.keys(profile)
         
         //method 2: concatenate all entities and compare similarity with job entities
         profileEntities = []
         profileParams.forEach(param => {
-            profile[param].map(x => {
-                profileEntities.push(x.name.toLowerCase())
+            profile[param].map(entity => {
+                profileEntities.push(entity.name.trim())
             })
+
+            if(param === 'currentPosition') {
+                scoreDetails[param] = Similarity.compareTwoStrings(job.title, profile[param].map(x => x.name.trim()).join(' '));
+            }
+            else {
+                scoreDetails[param] = Similarity.compareTwoStrings(jobEntities.join(' '), profile[param].map(x => x.name.trim()).join(' '));
+            }
+
+            console.log(`param (${param}) - GoogleNLP = ${scoreDetails[param]} - weighted: ${scoreDetails[param]* scoreWeight[param]}`);
+            console.log(`entities: \n${profile[param].map(x=> x.name)}\n`);
+            totalScore += scoreDetails[param]* scoreWeight[param]
         })
+
         profileEntities = [...new Set(profileEntities)];
 
-        score = Similarity.compareTwoStrings(jobEntities.join(' '), profileEntities.join(' '))
-        console.log(`\n\nFINAL SCORE  GoogleNLP = ${score}\n\n`)
-        return score
+        // totalScore = Similarity.compareTwoStrings(jobEntities.join(' '), profileEntities.join(' '))
+        console.log(`\n\nTOTAL SCORE  GoogleNLP = ${totalScore}\n\n`)
+
+        return {total: totalScore, scoreDetails}
     }
 
     static compareOneCandidate(job, profile) {

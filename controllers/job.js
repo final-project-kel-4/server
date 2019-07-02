@@ -48,7 +48,7 @@ class JobController {
             if(!scrapJobData) {
                 throw Error('Error scrapping the job link. Please try again.')
             }
-            console.log(scrapJobData);
+            // console.log(scrapJobData);
             //init Job model data
             newData = await JobController.initJobData(scrapJobData)
             newData.linkedinURL = linkedinLink;
@@ -162,6 +162,15 @@ const initModelData = async (rawData) => {
         return TextUtility.cleanInput(x.field)
     })
 
+    let skills = []
+    rawData.skill.forEach(x=> {
+        console.log(Object.values(x)[0]);
+        skills = [...skills, ...Object.values(x)[0]]
+    });
+    
+    newData.profile.skill = skills.map(x => {
+        return {name: x.toLowerCase()}
+    })
 
     //get the NLP result / entities for candidate attributes
     newData.entities.currentPosition = await GoogleNLP.analyze(newData.profile.currentPosition)
@@ -179,6 +188,10 @@ const initModelData = async (rawData) => {
 
         result = await GoogleNLP.analyze(newData.profile.educations.join(' '))
         newData.entities.educations = result
+    }
+
+    if(newData.profile.skill) {
+        newData.entities.skill = newData.profile.skill
     }
 
     return newData

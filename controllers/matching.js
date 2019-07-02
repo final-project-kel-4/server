@@ -29,7 +29,7 @@ class MatchingController {
     static async matchCandidates(jobId, candidateIds) {
         let job, candidateResult = []
         let candidates, promises =[];
-        let profile, score = {similarity: 0.0, google: 0.0};
+        let profile, scoreGoogle = 0.0, score = {similarity: 0.0, google: 0.0};
 
         try {
             job = await Job.findOne({_id: jobId});
@@ -41,15 +41,18 @@ class MatchingController {
             //get all candidate objects
             candidates = await Promise.all(promises);
 
+            console.log(`\nJob title: ${job.title}\nEntities: ${job.entities.map(x=>x.name)}\n`);
             //iterates all candidates' profile and compare the similarities
             candidates.forEach(person => {
                 profile = person.profile;
-                score.similarity = TextUtility.compareOneCandidate(job, profile)
-                score.google = TextUtility.compareEntities(job.entities, person.entities)
-                score.total = (score.similarity * 0.2 + score.google * 0.8);
+                scoreGoogle = TextUtility.compareEntities(job, person.entities)
+                // score.similarity = TextUtility.compareOneCandidate(job, profile)
+                // score.total = (score.similarity * 0.2 + scoreGoogle.total * 0.8);
+                score.total = scoreGoogle.total
+                score.details = scoreGoogle.scoreDetails
 
                 console.log(`score of candidate (${person.name}) = `,score);
-                candidateResult.push({candidate: person, score: score.total})
+                candidateResult.push({candidate: person, score: score.total, scoreDetails: scoreGoogle.scoreDetails})
             })
 
             //sort the result (highest score first)
