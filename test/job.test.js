@@ -76,11 +76,14 @@ const linkedInProfileData = {
   ]
 }
 
-let stubScrap = sinon.stub(scrapper, 'scrapJob')
-stubScrap.callsFake(() => linkedInJobData)
-sinon.stub(scrapper, 'scrapProfile').callsFake(() => linkedInProfileData)
+describe('Job Tests', () => {
+  before(function (done) {
+    this.stubScrap = sinon.stub(scrapper, 'scrapJob')
+    this.stubScrap.callsFake(() => linkedInJobData)
+    sinon.stub(scrapper, 'scrapProfile').callsFake(() => linkedInProfileData)
+    done()
+  })
 
-describe.only('Job Tests', () => {
   before(function (done) {
     userModel
       .create(user)
@@ -290,9 +293,9 @@ describe.only('Job Tests', () => {
     })
 
     it('should send error object and status code 500 when failed to scrap job', function (done) {
-      stubScrap.restore()
-      stubScrap = sinon.stub(scrapper, 'scrapJob')
-      stubScrap.callsFake(() => {
+      this.stubScrap.restore()
+      this.stubScrap = sinon.stub(scrapper, 'scrapJob')
+      this.stubScrap.callsFake(() => {
         return undefined
       })
 
@@ -305,7 +308,6 @@ describe.only('Job Tests', () => {
           expect(err).to.be.null
           expect(res).to.have.status(500)
           expect(res.body).to.be.an('object')
-          stubScrap.restore()
           done()
         })
     })

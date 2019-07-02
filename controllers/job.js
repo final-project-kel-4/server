@@ -19,7 +19,6 @@ class JobController {
             res.status(200).json(list)
         }
         catch (err) {
-            console.log("ERR - Job.findAll =>\n", err);
             res.status(500).json(err)
         }
     }
@@ -33,7 +32,6 @@ class JobController {
             res.status(200).json({...data.toObject(), matching: matching._id})
         }
         catch (err) {
-            console.log("ERR - Job.findOne =>\n", err);
             res.status(500).json(err)
         }
     }
@@ -62,7 +60,6 @@ class JobController {
             res.status(201).json(created)
         }
         catch (err) {
-            console.log("ERR - Job.create =>\n", err);
             res.status(500).json(err)
         }
     }
@@ -76,7 +73,6 @@ class JobController {
             res.status(201).json(deleted)
         }
         catch (err) {
-            console.log("ERR - Job.delete =>\n", err);
             res.status(500).json(err)
         }
     }
