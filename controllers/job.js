@@ -122,7 +122,7 @@ class JobController {
                 }
                 counter+=1
             }else{
-                let resultScrap = await scrapProfile(el, {auth:auth})
+                let resultScrap = await scrapper.scrapProfile(el, {auth:auth})
                 let newData = await initModelData(resultScrap)
                 newData.linkedinURL = el
 
