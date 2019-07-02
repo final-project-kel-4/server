@@ -5,7 +5,6 @@ const Matching = require('../models/matching')
 const modelCandidate = require('../models/candidate')
 const modelMatchingItem = require('../models/matchingitem')
 const modelMatching = require('../models/matching')
-const {scrapProfile} = require('../helpers/linkedin-scrapper/index')
 const GoogleNLP = require('../helpers/google-nlp')
 
 let auth = {
@@ -47,10 +46,11 @@ class JobController {
         let matching;
         
         try {
-            scrapJobData = await scrapJob(linkedinLink);
+            scrapJobData = await scrapper.scrapJob(linkedinLink);
             if(!scrapJobData) {
                 throw Error('Error scrapping the job link. Please try again.')
             }
+            console.log(scrapJobData);
             //init Job model data
             newData = await JobController.initJobData(scrapJobData)
             newData.linkedinURL = linkedinLink;
