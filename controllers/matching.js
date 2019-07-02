@@ -1,12 +1,9 @@
-const axios = require('axios')
-const stringSimilarity = require('string-similarity');
 const TextUtility = require('../helpers/textProcessing')
 const scoreSort = require('../helpers/sort')
 const Match = require('../models/matching')
 const Job = require('../models/job')
 const Candidate = require('../models/candidate')
 const MatchingItem = require('../models/matchingitem')
-const ObjectId = require('mongoose').Types.ObjectId
 
 class MatchingController {
     static findOne(req, res) {
@@ -21,7 +18,6 @@ class MatchingController {
                 }
             })
             .catch(err => {
-                console.log(`ERR - MatchingController::findOne\n ${err}`);
                 res.status(500).json(err)
             })
     }
@@ -75,10 +71,9 @@ class MatchingController {
         let matchingId = req.params.id
         let promises = []
         try {
-            // TODO - Perform recompare   
+            // TODO - Perform recompare
             // 1. Get the matching model
             matching = await Match.findOne({ _id: matchingId }).populate('items');
-
             if (!matching) new Error('Invalid ID')
             else if (matching.items && matching.items.length > 0) {
                 jobId = matching.job;
@@ -103,7 +98,6 @@ class MatchingController {
             }
         }
         catch (err) {
-            console.log("\n\nERR - Matching::recompare \n", err);
             res.status(500).json(err)
         }
     }
