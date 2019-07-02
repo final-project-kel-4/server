@@ -253,6 +253,29 @@ const initModelData = async (rawData) => {
     })
 
 
+    /* add entities attribute, which contains same attributes as profile
+        entities {
+            currentPosition,
+            about,
+            workExperience,
+            recommendations,
+            educations
+        }
+    */
+    newData.entities.currentPosition = await GoogleNLP.analyze(newData.profile.currentPosition)
+    newData.entities.about = await GoogleNLP.analyze(newData.profile.currentPosition)
+    newData.entities.currentPosition = await GoogleNLP.analyze(newData.profile.currentPosition)
+    newData.entities.workExperience = newData.profile.workExperience.map( async (x) => {
+        return await GoogleNLP.analyze(x)
+    })
+    newData.entities.recommendations = newData.profile.workExperience.map( async (x) => {
+        return await GoogleNLP.analyze(x)
+    })
+    newData.entities.educations = newData.profile.educations.map( async (x) => {
+        return await GoogleNLP.analyze(x)
+    })
+
+
     return newData
 }
 
