@@ -4,35 +4,20 @@ const Similarity = require('string-similarity');
 
 class Utility {
     static compareEntities(job, profile) {
-        let score = 0.0, paramScore = 0.0
-        let profileParams = [], jobEntities = job.map(x=> x.name).join(' '), profileEntities
+        let score = 0.0, freqScore = 0.0
+        let profileParams = [], jobEntities = job.map(x => x.name), profileEntities
         profileParams = Object.keys(profile)
-
-        /*
-        profileParams.forEach(param => {
-            paramScore = 0.0
-            profileEntities = profile[param].map(x => x.name).join(' ')
-            paramScore = Similarity.compareTwoStrings(jobEntities, profileEntities)
-
-            console.log(`param (${param})\ndata: ${profileEntities}\n`)
-            console.log('Param Score -- ', paramScore, '\n\n');
-            score += paramScore
-        });
-        
-        score = score /(profileParams.length > 0 ? profileParams.length : 1)
-        */
         
         //method 2: concatenate all entities and compare similarity with job entities
         profileEntities = []
         profileParams.forEach(param => {
             profile[param].map(x => {
-                profileEntities.push(x)
+                profileEntities.push(x.name.toLowerCase())
             })
         })
         profileEntities = [...new Set(profileEntities)];
 
-        score = Similarity.compareTwoStrings(jobEntities, profileEntities.join(' '))
-
+        score = Similarity.compareTwoStrings(jobEntities.join(' '), profileEntities.join(' '))
         console.log(`\n\nFINAL SCORE  GoogleNLP = ${score}\n\n`)
         return score
     }
@@ -55,13 +40,13 @@ class Utility {
            paramScore = 0.0, gParamScore = 0.0
 
            if(param === 'currentPosition') {
-               paramScore = Similarity.compareTwoStrings(job.get("title"), profile[param])
+               paramScore = Similarity.compareTwoStrings(job.get("title").toLowerCase(), profile[param].toLowerCase())
                 console.log(`\nparam: ${param} | itemScore = (${paramScore}) | Coefficient = (${COEFFICIENTS[param]})`);
                paramScore *= COEFFICIENTS[param]
            }
            else {
             if(typeof(profile[param]) === 'string') {
-                let rawScore = Similarity.compareTwoStrings(job.cleanDescription, profile[param])
+                let rawScore = Similarity.compareTwoStrings(job.cleanDescription.toLowerCase(), profile[param].toLowerCase())
                 console.log('==============1',rawScore, param)
 
                 if(rawScore == NaN) rawScore = 0

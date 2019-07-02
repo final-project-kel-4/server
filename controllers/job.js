@@ -45,9 +45,9 @@ class JobController {
         let newData, linkedinLink = req.body.linkedin
         let created, scrapJobData
         let matching;
-        scrapJobData = await scrapper.scrapJob(linkedinLink);
-
+        
         try {
+            scrapJobData = await scrapJob(linkedinLink);
             if(!scrapJobData) {
                 throw Error('Error scrapping the job link. Please try again.')
             }

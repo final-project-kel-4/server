@@ -46,10 +46,10 @@ class MatchingController {
                 profile = person.profile;
                 score.similarity = TextUtility.compareOneCandidate(job, profile)
                 score.google = TextUtility.compareEntities(job.entities, person.entities)
-                score.total = score.similarity + score.google / 2.0;
+                score.total = (score.similarity * 0.2 + score.google * 0.8);
 
                 console.log(`score of candidate (${person.name}) = `,score);
-                candidateResult.push({candidate: person, score})
+                candidateResult.push({candidate: person, score: score.total})
             })
 
             //sort the result (highest score first)
