@@ -78,6 +78,19 @@ const company = {
   auth: {
     links: {
       jobs: 'a[data-control-name="see_all_jobs"]'
+    },
+    jobs: {
+      root: 'ul.jobs-search-results__list',
+      items: {
+        root: 'li.artdeco-list__item',
+        link: 'a.job-card-search__link-wrapper',
+        title: 'h1.jobs-details-top-card__job-title',
+        company: {
+          name: 'h1.org-top-card-summary__title',
+          logo: 'img.org-top-card-primary-content__logo',
+          description: 'div#job-details > span'
+        }
+      }
     }
   },
   links: {

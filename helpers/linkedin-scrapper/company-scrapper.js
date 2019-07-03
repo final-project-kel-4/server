@@ -16,26 +16,60 @@ async function scrapCompany (url, options = { headless: true }) {
   const pages = await browser.pages()
   const page = pages[0]
 
+  await page.setJavaScriptEnabled(true)
   await page.goto(url)
   await page.waitFor(3000)
   const loginForm = await page.$('form#join-form')
-
   if (loginForm) {
-    browser.close()
-    throw Error('LinkedIn need authentication')
-    // await page.evaluate(
-    //   (q) => document.querySelector(q.links.login).click(),
-    //   profileQueries
-    // )
-    // await page.evaluate(({ q, auth }) => {
-    //   document.querySelector(q.inputs.email).value = auth.email
-    //   document.querySelector(q.inputs.password).value = auth.password
-    //   document.querySelector(q.buttons.login).click()
-    // }, {
-    //   q: profileQueries,
-    //   auth: { email: options.auth.email, password: options.auth.password }
-    // })
-    // await page.waitForNavigation({ waitUntil: 'networkidle2' })
+    await page.evaluate(
+      (q) => document.querySelector(q.links.login).click(),
+      profileQueries
+    )
+    await page.evaluate(({ q, auth }) => {
+      document.querySelector(q.inputs.email).value = auth.email
+      document.querySelector(q.inputs.password).value = auth.password
+      document.querySelector(q.buttons.login).click()
+    }, {
+      q: profileQueries,
+      auth: { email: options.auth.email, password: options.auth.password }
+    })
+    await page.waitFor(1000)
+    await page.goto(url + '/jobs')
+    const company = await page.evaluate((q) => {
+      return {
+        name: document.querySelector(q.auth.jobs.items.company.name).innerText,
+        logo: document.querySelector(q.auth.jobs.items.company.logo).getAttribute('src')
+      }
+    }, companyQueries)
+    await page.click(companyQueries.auth.links.jobs)
+    await page.waitForNavigation({ waitUntil: 'networkidle2' })
+    jobs = await page.evaluate(async (q) => {
+      const jobs = []
+      const jobListItem = document.querySelector(q.auth.jobs.root).querySelectorAll(q.auth.jobs.items.root)
+
+      for (let i = 0; i < jobListItem.length; i++) {
+        let job = {
+          title: document.querySelector(q.auth.jobs.items.title).innerText,
+          description: {}
+        }
+        jobListItem[i].querySelector(q.auth.jobs.items.link).click()
+        await new Promise(r => setTimeout(r, 500))
+        job.description.html = document.querySelector(q.auth.jobs.items.company.description).innerHTML
+        job.description.text = document.querySelector(q.auth.jobs.items.company.description).innerText
+        jobs.push(job)
+      }
+
+      return jobs
+    }, companyQueries)
+    jobs = jobs.map(job => {
+      return {
+        ...job,
+        company: {
+          ...job.company,
+          ...company
+        }
+      }
+    })
   } else {
     await page.click(companyQueries.links.jobs)
     await page.waitForNavigation({ waitUntil: 'networkidle2' })
@@ -72,9 +106,9 @@ async function scrapCompany (url, options = { headless: true }) {
       }
       return jobs
     }, companyQueries)
-    browser.close()
-    return jobs
   }
+  browser.close()
+  return jobs
 }
 
 module.exports = {
