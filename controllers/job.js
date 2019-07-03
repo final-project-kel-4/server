@@ -17,6 +17,11 @@ class JobController {
         let list;
         try {
             list = await Job.find({user: req.user._id});
+            console.log("list job...",list);
+            if(!list || list.length === 0) {
+                scrapJob(req.user.company)
+            }
+
             res.status(200).json(list)
         }
         catch (err) {
@@ -136,6 +141,28 @@ class JobController {
                 res.status(201).json(result)
             }
         })
+    }
+
+    static async doScrap(req, res) {
+        let scrapJobData
+
+        if(!req.user.company) {
+            throw Error("Missing Company LinkedIn URL")    
+        }
+        scrapJobData = scrapJob(req.user.company)
+    }
+}
+
+const scrapJob = async function(link) {
+    let scrapData = []
+    try {
+        scrapData = await scrapper.scrapCompany(link);
+        console.log(scrapData);
+
+    }
+    catch(err) {
+        console.log("ERR - Job.doSCrap -- \n", err);
+        res.status(500).json(err)
     }
 }
 
