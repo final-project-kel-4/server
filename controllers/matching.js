@@ -37,24 +37,31 @@ class MatchingController {
             //get all candidate objects
             candidates = await Promise.all(promises);
 
-            console.log(`\nJob title: ${job.title}\nEntities: ${job.entities.map(x=>x.name)}\n`);
+            console.log("Comparing Job:\n", job.title);
+            console.log(job.originalDescription);
+
             //iterates all candidates' profile and compare the similarities
             candidates.forEach(person => {
                 profile = person.profile;
-                scoreGoogle = TextUtility.compareEntities(job, person.entities)
+                //method 1 = compare job desc as 1 string vs each profile param as 1 string
                 // score.similarity = TextUtility.compareOneCandidate(job, profile)
-                // score.total = (score.similarity * 0.2 + scoreGoogle.total * 0.8);
+
+                //method 2: compare each word in profile entities
+                scoreGoogle = TextUtility.compareEntities(job, person.entities)
+
+                // method 3: get similarity of each tag in profile params, vs the whole job desc. If exist, vote as 100%
+                // scoreGoogle = TextUtility.compareProfileBased(job, person.entities)
+
+
                 score.total = scoreGoogle.total
                 score.details = scoreGoogle.scoreDetails
 
-                console.log(`score of candidate (${person.name}) = `,score);
+                console.log(`score of candidate (${person.name}) = `,score,"\n\n");
                 candidateResult.push({candidate: person, score: score.total, scoreDetails: scoreGoogle.scoreDetails})
             })
 
             //sort the result (highest score first)
             scoreSort(candidateResult)
-            console.log('matching candidate -------\n')
-            console.log(candidateResult)
 
             return candidateResult
         }

@@ -3,14 +3,37 @@ const COEFFICIENTS = require('../constants')
 const Similarity = require('string-similarity');
 
 const scoreWeight = {
-    currentPosition: 0.2,
-    about: 0.1,
-    experience: 0.3,
-    educations: 0.1,
+    currentPosition: 0.3,
+    about: 0.01,
+    experience: 0.38,
+    educations: 0.01,
     skill: 0.3
 }
 
 class Utility {
+    static compareEntityList(jobList, profileList) {
+        let score = 0.0, itemVote = 0, currentVote = 0
+        jobList = jobList.entities.map(x => x.name)
+        jobList.forEach(jobItem => {
+            currentVote = 0.0
+            profileList.forEach(profileItem => {
+                let newVote = 0.0
+                newVote = Similarity.compareTwoStrings(jobItem, profileItem.toLowerCase())
+                // console.log('checking job item -> '+jobItem + " | profileItem = "+ profileItem + "  SCORE: " + currentVote);
+                
+                if(newVote > currentVote) currentVote = newVote
+            })
+            
+            score = score <= currentVote ? currentVote : score;
+            // console.log('score job item -> '+jobItem +" ===> "+ currentVote +"\n" );
+        })
+
+        // score = score / jobList.length * 1.0
+        console.log("ListBased Score Profile ===> "+ score+ "\n");
+
+        return score
+    }
+
     static compareEntities(job, profile) {
         let totalScore = 0.0, freqScore = 0.0
         let profileParams = [], jobEntities = job.entities.map(x => x.name.trim()), profileEntities
@@ -21,35 +44,114 @@ class Utility {
             educations: 0.0,
             skill: 0.0
         }
-        profileParams = Object.keys(profile)
+
+        try {
+            profileParams = Object.keys(profile)
         
-        //method 2: concatenate all entities and compare similarity with job entities
-        profileEntities = []
-        profileParams.forEach(param => {
-            profile[param].map(entity => {
-                profileEntities.push(entity.name.trim())
+            //method 2: concatenate all entities and compare similarity with job entities
+            profileEntities = []
+            profileParams.forEach(param => {
+                if(profile[param]) {
+                    profile[param].map(entity => {
+                        profileEntities.push(entity.name.trim())
+                    })
+    
+                    if(param === 'currentPosition') {
+                        scoreDetails[param] = Similarity.compareTwoStrings(job.title, profile[param].map(x => x.name.trim()).join(' '));
+                    }
+                    else {
+                        // scoreDetails[param] = Similarity.compareTwoStrings(jobEntities.join(' '), profile[param].map(x => x.name.trim()).join(' '));
+                        scoreDetails[param] = Utility.compareEntityList(job, profile[param].map(x => x.name.trim()));
+                    }
+    
+                    console.log(`param (${param}) - GoogleNLP = ${scoreDetails[param]} - weighted: ${scoreDetails[param]* scoreWeight[param]}`);
+                    console.log(`entities: \n${profile[param].map(x=> x.name)}\n`);
+                    totalScore += scoreDetails[param]* scoreWeight[param]
+                }
             })
 
-            if(param === 'currentPosition') {
-                scoreDetails[param] = Similarity.compareTwoStrings(job.title, profile[param].map(x => x.name.trim()).join(' '));
-            }
-            else {
-                scoreDetails[param] = Similarity.compareTwoStrings(jobEntities.join(' '), profile[param].map(x => x.name.trim()).join(' '));
-            }
+            profileEntities = [...new Set(profileEntities)];
 
-            console.log(`param (${param}) - GoogleNLP = ${scoreDetails[param]} - weighted: ${scoreDetails[param]* scoreWeight[param]}`);
-            console.log(`entities: \n${profile[param].map(x=> x.name)}\n`);
-            totalScore += scoreDetails[param]* scoreWeight[param]
-        })
+            console.log(`\nTOTAL SCORE  GoogleNLP = ${totalScore}`)
+            console.log(`TOTAL SCORE  Job Description vs all Profile Entities = ${Similarity.compareTwoStrings(job.cleanDescription, profileEntities.join(" "))}`)
+            console.log(`TOTAL SCORE  Job Entities vs all Profile Entities = ${Similarity.compareTwoStrings(jobEntities.join(' '), profileEntities.join(" "))}`)
 
-        profileEntities = [...new Set(profileEntities)];
-
-        // totalScore = Similarity.compareTwoStrings(jobEntities.join(' '), profileEntities.join(' '))
-        console.log(`\n\nTOTAL SCORE  GoogleNLP = ${totalScore}\n\n`)
-
-        return {total: totalScore, scoreDetails}
+            return {total: totalScore, scoreDetails}
+        }
+        catch(err) {
+            console.log("ERR - Utility::compareEntities ===> \n\n", err);
+            return {total: totalScore, scoreDetails}
+        }
     }
 
+    static compareProfileBased(job, profile) {
+        let totalScore = 0.0
+        let profileParams = [], profileEntities
+        let jobEntities = job.entities.map(x => x.name).join(' ')
+        let jobSentences = job.cleanDescription.replace(/([.?!])\s*(?=[A-Z])/g, "$1|").split("|")
+
+        console.log('job in sentences ---- \n', jobSentences);
+
+
+        let scoreDetails = {
+            currentPosition: 0.0,
+            about: 0.0,
+            experience: 0.0,
+            educations: 0.0,
+            skill: 0.0
+        }
+
+        try {
+            profileParams = Object.keys(profile)
+        
+            profileEntities = []
+            profileParams.forEach(param => {
+                if(profile[param]) {
+                    profile[param].map(entity => {
+                        profileEntities.push(entity.name.trim())
+                    })
+    
+                    if(param === 'currentPosition') {
+                        scoreDetails[param] = Similarity.compareTwoStrings(job.title, profile[param].map(x => x.name.trim()).join(' '));
+                    }
+                    else {
+                        let profileScore = 0.0, freq = 0
+                        let match = false
+                        profile[param].forEach(entity => {
+                            let regx = new RegExp(entity.name, "i")
+                            match = regx.test(jobEntities);
+
+                            if(match) {
+                                freq++
+                            }
+
+                            console.log('profile item : '+ entity.name + " --- match => "+ match);
+                        })
+                    
+                        profileScore = freq * 1.0 / (profile[param].length > 0 ? profile[param].length : 1)
+                        scoreDetails[param] = profileScore
+                    }
+    
+                    console.log(`\nparam (${param}) - GoogleNLP = ${scoreDetails[param]} - weighted: ${scoreDetails[param]* scoreWeight[param]}`);
+                    console.log(`entities: \n${profile[param].map(x=> x.name)}\n`);
+                    totalScore += scoreDetails[param] * scoreWeight[param]
+                }
+            })
+
+            // join of all entities of a candidate
+            profileEntities = [...new Set(profileEntities)];
+
+            console.log(`\n\nTOTAL SCORE (profile based) = ${totalScore}\n\n`)
+
+            return {total: totalScore, scoreDetails}
+        }
+        catch(err) {
+            console.log("ERR - Utility::compareEntities ===> \n\n", err);
+            return {total: totalScore, scoreDetails}
+        }
+    }
+
+    //compare job desc as 1 string vs profile param (position ,exp) as one string each
     static compareOneCandidate(job, profile) {
         /* 
         *   jobDescription - String 
@@ -57,7 +159,7 @@ class Utility {
         *       currentPosition: String, coefficient
         *       about: "",
         *       workExperience: ["", ""],
-        *       recommendations: ["", ""]
+        *       skill: ["", ""]
         *       educations: ["", ""] (optional params)
         */
        let score = 0.0, paramScore = 0.0, gScore = 0.0, gParamScore= 0.0
