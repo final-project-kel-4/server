@@ -46,6 +46,7 @@ class JobController {
                 
                 res.status(200).json(jobCreate)
             }else{
+                list.reverse();
                 res.status(200).json(list)
             }
         }
