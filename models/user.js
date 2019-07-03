@@ -18,7 +18,17 @@ let userSchema = new Schema({
       },
     }]
   },
-  password: String,
+  password: String, 
+  company: {
+    type: String,
+    validate: [{
+      validator: function (value) {
+        return /(https?:\/\/(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z0-9][a-z0-9-]{0,61}[a-z0-9])(:?\d*)\/?([a-z_\/0-9\-#.]*)\??([a-z_\/0-9\-#=&]*)/.test(value)
+      },
+      msg: "Must be valid URL format"
+    }],
+    required: [true, "Company LinkedIn Link is mandatory"]
+  }
 })
 
 userSchema.pre('save', function (next) {

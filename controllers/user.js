@@ -7,7 +7,8 @@ class userController {
     let newUser = {
       name: req.body.name,
       email: req.body.email,
-      password: req.body.password
+      password: req.body.password,
+      company: req.body.company
     }
     modelUser.create(newUser)
       .then(data => {

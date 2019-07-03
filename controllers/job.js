@@ -15,8 +15,15 @@ let auth = {
 class JobController {
     static async findAll(req, res) {
         let list;
+        let resultScrapCompany
         try {
             list = await Job.find({user: req.user._id});
+            if(list.length===0){
+                resultScrapCompany = await scrapper.scrapCompany(req.user.company, { auth: auth })
+            }
+            console.log(resultScrapCompany);
+            
+            
             res.status(200).json(list)
         }
         catch (err) {
