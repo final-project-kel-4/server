@@ -14,25 +14,31 @@ class TextAnalyzer {
             type: 'PLAIN_TEXT',
         };
 
-        // Detects entities in the document
-        const [result] = await client.analyzeEntities({document});
-        let entities = result.entities;
-
-        entities = entities.filter(x => {
-            if(x.type !== 'NUMBER' && x.salience >= 0.002) 
-            {
-                return true
-            }
-            else {
-                return false
-            }
-        });
-
-        entities = entities.map(item => {
-            return {name: item.name, salience: item.salience}
-        })
-
-        return entities
+        try {
+            // Detects entities in the document
+            const [result] = await client.analyzeEntities({document});
+            let entities = result.entities;
+    
+            entities = entities.filter(x => {
+                if(x.type !== 'NUMBER' && x.salience >= 0.002) 
+                {
+                    return true
+                }
+                else {
+                    return false
+                }
+            });
+    
+            entities = entities.map(item => {
+                return {name: item.name, salience: item.salience}
+            })
+    
+            return entities
+        }
+        catch(err) {
+            console.log("ERR - GoogleNLP => \n", err);
+            return null
+        }
     }
 }
 

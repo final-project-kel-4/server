@@ -3,9 +3,9 @@
 // total score after summing each of below parameters will be 100%
 
 module.exports = {
-    currentPosition: 0.3,
-    about: 0.2,
-    workExperience: 0.35,
-    recommendations: 0.10,
-    educations: 0.05,
+    currentPosition: 0.1,
+    about: 0.01,
+    experience: 0.47,
+    educations: 0.01,
+    skill: 0.41
 }

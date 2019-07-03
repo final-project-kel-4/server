@@ -19,7 +19,7 @@ class JobController {
             list = await Job.find({user: req.user._id});
             console.log("list job...",list);
             if(!list || list.length === 0) {
-                scrapJob(req.user.company)
+                //scrapJob(req.user.company)
             }
 
             res.status(200).json(list)
