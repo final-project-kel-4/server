@@ -3,6 +3,10 @@ const TextUtility = require('../helpers/textProcessing')
 const scrapper = require('../helpers/linkedin-scrapper/index')
 const GoogleNLP = require('../helpers/google-nlp')
 
+const auth = {
+    email: process.env.LINKEDIN_EMAIL,
+    password: process.env.LINKEDIN_PASSWORD
+}
 class CandidateController {
     static async refresh(req, res) {
         let candidate, scrapData
