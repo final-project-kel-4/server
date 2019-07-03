@@ -57,6 +57,8 @@ class MatchingController {
 
             //sort the result (highest score first)
             scoreSort(candidateResult)
+            console.log('matching candidate -------\n')
+            console.log(candidateResult)
 
             return candidateResult
         }
@@ -89,11 +91,11 @@ class MatchingController {
                 matching.items.forEach(item => {
                     let found = matchingData.find(x => x.candidate._id.toString() === item.candidate.toString());
 
-                    promises.push(MatchingItem.findOneAndUpdate({ _id: item._id }, { score: found.score }, { new: true }))
+                    promises.push(MatchingItem.findOneAndUpdate({ _id: item._id }, { score: found.score, scoreDetails: found.scoreDetails }, { new: true }))
+                    
                 })
 
                 await Promise.all(promises)
-
                 //populate the reference attributes
                 newMatching = await Match.findOneAndUpdate({ _id: matchingId }, { updatedat: new Date }, { new: true }).populate({ path: 'items', populate: { path: 'candidate', model: 'Candidate' } }).populate('job');
 

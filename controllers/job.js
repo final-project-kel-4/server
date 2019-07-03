@@ -48,7 +48,7 @@ class JobController {
             if(!scrapJobData) {
                 throw Error('Error scrapping the job link. Please try again.')
             }
-            // console.log(scrapJobData);
+            console.log(scrapJobData);
             //init Job model data
             newData = await JobController.initJobData(scrapJobData)
             newData.linkedinURL = linkedinLink;

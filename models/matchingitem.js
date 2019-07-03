@@ -9,6 +9,10 @@ let matchingItemSchema = new Schema({
     score: {
         type: Object,
         default: {}
+    },
+    scoreDetails: {
+        type: Object,
+        default: {}
     }
 })
 
