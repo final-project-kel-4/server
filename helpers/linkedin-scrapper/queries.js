@@ -73,6 +73,42 @@ const profile = {
   }
 }
 
+const company = {
+  isAuth: '',
+  auth: {
+    links: {
+      jobs: 'a[data-control-name="see_all_jobs"]'
+    }
+  },
+  links: {
+    jobs: 'a.top-card__cta-button'
+  },
+  buttons: {
+    seeMoreJobs: 'button.see-more-jobs'
+  },
+  company: {
+    logo: 'img.company-logo',
+    name: 'a.topcard__org-name-link'
+  },
+  jobs: {
+    root: 'ul.jobs-search__results-list',
+    items: {
+      root: 'li.result-card',
+      link: 'a.result-card__full-card-link',
+      title: 'h3.result-card__title',
+      company: {
+        name: 'a.result-card__subtitle-link',
+        logo: 'img.result-card__image',
+        address: 'span.job-result-card__location'
+      },
+      description: {
+        html: 'div.description__text',
+        text: 'div.description__text'
+      }
+    }
+  }
+}
+
 module.exports = {
-  job, profile
+  job, profile, company
 }

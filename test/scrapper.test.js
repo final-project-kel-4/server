@@ -1,7 +1,7 @@
 const chai = require('chai')
 const chaiHttp = require('chai-http')
 
-const { scrapJob, scrapProfile } = require('../helpers/linkedin-scrapper')
+const { scrapJob, scrapProfile, scrapCompany } = require('../helpers/linkedin-scrapper')
 
 chai.use(chaiHttp)
 
@@ -28,6 +28,21 @@ describe('Scrapper Tests', function () {
         password: 'prasetio017'
       }
       scrapProfile(profileUrl, { auth })
+        .then(data => {
+          expect(Object.keys(data)).to.have.lengthOf.above(0)
+          done()
+        })
+        .catch(err => console.log(err))
+    })
+  })
+  describe('Company scrapper test', () => {
+    it('should run', (done) => {
+      let companyUrl = 'https://linkedin.com/company/pt--tokopedia'
+      let auth = {
+        email: 'prasetio017@gmail.com',
+        password: 'prasetio017'
+      }
+      scrapCompany(companyUrl, { headless: false, auth })
         .then(data => {
           expect(Object.keys(data)).to.have.lengthOf.above(0)
           done()
