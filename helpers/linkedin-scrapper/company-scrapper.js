@@ -33,43 +33,51 @@ async function scrapCompany (url, options = { headless: true }) {
       q: profileQueries,
       auth: { email: options.auth.email, password: options.auth.password }
     })
-    await page.waitFor(1000)
-    await page.goto(url + '/jobs')
-    const company = await page.evaluate((q) => {
-      return {
-        name: document.querySelector(q.auth.jobs.items.company.name).innerText,
-        logo: document.querySelector(q.auth.jobs.items.company.logo).getAttribute('src')
-      }
-    }, companyQueries)
-    await page.click(companyQueries.auth.links.jobs)
     await page.waitForNavigation({ waitUntil: 'networkidle2' })
-    jobs = await page.evaluate(async (q) => {
-      const jobs = []
-      const jobListItem = document.querySelector(q.auth.jobs.root).querySelectorAll(q.auth.jobs.items.root)
-
-      for (let i = 0; i < jobListItem.length; i++) {
-        let job = {
-          title: document.querySelector(q.auth.jobs.items.title).innerText,
-          description: {}
+    const isCaptcha = !!(await page.$('.app__content'))
+    if (isCaptcha) {
+      browser.close()
+      throw Error('Error: LinkedIn asking for captcha.')
+    } else {
+      await page.goto(url + '/jobs')
+      const company = await page.evaluate((q) => {
+        return {
+          name: document.querySelector(q.auth.jobs.items.company.name).innerText,
+          logo: document.querySelector(q.auth.jobs.items.company.logo).getAttribute('src')
         }
-        jobListItem[i].querySelector(q.auth.jobs.items.link).click()
-        await new Promise(r => setTimeout(r, 500))
-        job.description.html = document.querySelector(q.auth.jobs.items.company.description).innerHTML
-        job.description.text = document.querySelector(q.auth.jobs.items.company.description).innerText
-        jobs.push(job)
-      }
-
-      return jobs
-    }, companyQueries)
-    jobs = jobs.map(job => {
-      return {
-        ...job,
-        company: {
-          ...job.company,
-          ...company
+      }, companyQueries)
+      await page.click(companyQueries.auth.links.jobs)
+      await page.waitForNavigation({ waitUntil: 'networkidle2' })
+      jobs = await page.evaluate(async (q) => {
+        const jobs = []
+        const jobListItem = document.querySelector(q.auth.jobs.root).querySelectorAll(q.auth.jobs.items.root)
+        for (let i = 0; i < jobListItem.length; i++) {
+          if (jobListItem[i+1]) {
+            jobListItem[i+1].scrollIntoView()
+          }
+          let job = {
+            title: document.querySelector(q.auth.jobs.items.title).innerText,
+            description: {}
+          }
+          jobListItem[i].querySelector(q.auth.jobs.items.link).click()
+          await new Promise(r => setTimeout(r, 500))
+          job.description.html = document.querySelector(q.auth.jobs.items.company.description).innerHTML
+          job.description.text = document.querySelector(q.auth.jobs.items.company.description).innerText
+          jobs.push(job)
         }
-      }
-    })
+
+        return jobs
+      }, companyQueries)
+      jobs = jobs.map(job => {
+        return {
+          ...job,
+          company: {
+            ...job.company,
+            ...company
+          }
+        }
+      })
+    }
   } else {
     await page.click(companyQueries.links.jobs)
     await page.waitForNavigation({ waitUntil: 'networkidle2' })

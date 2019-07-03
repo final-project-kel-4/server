@@ -31,93 +31,100 @@ async function scrapProfile (url, options = { headless: true }) {
     auth: { email: options.auth.email, password: options.auth.password }
   })
   await page.waitForNavigation({ waitUntil: 'networkidle2' })
-  await page.evaluate(scrollToBottom)
-  await page.evaluate((q) => {
-    const buttonMoreSkill = document.querySelector(q.buttons.moreSkill)
-    if (buttonMoreSkill) {
-      buttonMoreSkill.click()
-    }
-  }, profileQueries)
-  await page.waitFor(500)
-  pages[0].waitFor(1000).then(() => browser.close())
-  return await page.evaluate((q) => {
-    function isNull (el, msg) {
-      if (el === null && typeof el === 'object') {
-        console.log(msg)
-        return undefined
-      } else {
-        return el
+  const isCaptcha = !!(await page.$('.app__content'))
+  if (isCaptcha) {
+    browser.close()
+    throw Error('Error: LinkedIn asking for captcha.')
+  } else {
+    console.log('not captcha')
+    await page.evaluate(scrollToBottom)
+    await page.evaluate((q) => {
+      const buttonMoreSkill = document.querySelector(q.buttons.moreSkill)
+      if (buttonMoreSkill) {
+        buttonMoreSkill.click()
       }
-    }
-    let about = document.querySelector(q.about)
-    let data = {
-      photo: document.querySelector(q.photo).getAttribute('src'),
-      name: isNull(document.querySelector(q.name), 'name').innerText,
-      currentJob: isNull(document.querySelector(q.currentJob), 'current job').innerText,
-      about: about ? about.innerText : ''
-    }
-    data.experience = []
-    let experiences = document.querySelectorAll(q.experience.items.root)
-    for (let i = 0; i < experiences.length; i++) {
-      let experience = {
-        company: {
-          logo: experiences[i].querySelector(q.experience.items.company.logo).getAttribute('src')
-        },
+    }, profileQueries)
+    await page.waitFor(500)
+    pages[0].waitFor(1000).then(() => browser.close())
+    return await page.evaluate((q) => {
+      function isNull (el, msg) {
+        if (el === null && typeof el === 'object') {
+          console.log(msg)
+          return undefined
+        } else {
+          return el
+        }
       }
-      const isMulti = !!experiences[i].querySelector(q.experience.items.isMulti)
-      if (isMulti) {
-        experience.company.name = isNull(experiences[i].querySelector(q.experience.items.company.name.multi), 'multi company name').innerText
-        experience.position = []
-        let positions = experiences[i].querySelectorAll(q.experience.items.position.multi.items)
-        for (let j = 0; j < positions.length; j++) {
-          let desc = experiences[i].querySelector(q.experience.items.position.multi.root +' '+q.experience.items.position.description)
-          experience.position.push({
-            name: isNull(positions[j], 'multi position name', j).innerText,
+      let about = document.querySelector(q.about)
+      let data = {
+        photo: document.querySelector(q.photo).getAttribute('src'),
+        name: isNull(document.querySelector(q.name), 'name').innerText,
+        currentJob: isNull(document.querySelector(q.currentJob), 'current job').innerText,
+        about: about ? about.innerText : ''
+      }
+      data.experience = []
+      let experiences = document.querySelectorAll(q.experience.items.root)
+      for (let i = 0; i < experiences.length; i++) {
+        let experience = {
+          company: {
+            logo: experiences[i].querySelector(q.experience.items.company.logo).getAttribute('src')
+          },
+        }
+        const isMulti = !!experiences[i].querySelector(q.experience.items.isMulti)
+        if (isMulti) {
+          experience.company.name = isNull(experiences[i].querySelector(q.experience.items.company.name.multi), 'multi company name').innerText
+          experience.position = []
+          let positions = experiences[i].querySelectorAll(q.experience.items.position.multi.items)
+          for (let j = 0; j < positions.length; j++) {
+            let desc = experiences[i].querySelector(q.experience.items.position.multi.root +' '+q.experience.items.position.description)
+            experience.position.push({
+              name: isNull(positions[j], 'multi position name', j).innerText,
+              description: desc ? desc.innerText : ''
+            })
+          }
+        } else {
+          let desc = experiences[i].querySelector(q.experience.items.position.description)
+          experience.company.name = isNull(experiences[i].querySelector(q.experience.items.company.name.single), 'single company name').innerText
+
+          experience.position = {
+            name: isNull(experiences[i].querySelector(q.experience.items.position.single), 'single position name').innerText,
             description: desc ? desc.innerText : ''
-          })
+          }
         }
-      } else {
-        let desc = experiences[i].querySelector(q.experience.items.position.description)
-        experience.company.name = isNull(experiences[i].querySelector(q.experience.items.company.name.single), 'single company name').innerText
+        data.experience.push(experience)
+      }
 
-        experience.position = {
-          name: isNull(experiences[i].querySelector(q.experience.items.position.single), 'single position name').innerText,
-          description: desc ? desc.innerText : ''
+      data.education = []
+      let educations = document.querySelectorAll(q.education.items.root)
+      for (let i = 0; i < educations.length; i++) {
+        let degree = educations[i].querySelector(q.education.items.degree)
+        let field = educations[i].querySelector(q.education.items.field)
+        let education = {
+          degree: degree ? degree.innerText : '',
+          field: field ? field.innerText : '',
+          school: {
+            logo: isNull(educations[i].querySelector(q.education.items.school.logo), 'logo').getAttribute('src'),
+            name: isNull(educations[i].querySelector(q.education.items.school.name), 'name').innerText
+          }
         }
+        data.education.push(education)
       }
-      data.experience.push(experience)
-    }
 
-    data.education = []
-    let educations = document.querySelectorAll(q.education.items.root)
-    for (let i = 0; i < educations.length; i++) {
-      let degree = educations[i].querySelector(q.education.items.degree)
-      let field = educations[i].querySelector(q.education.items.field)
-      let education = {
-        degree: degree ? degree.innerText : '',
-        field: field ? field.innerText : '',
-        school: {
-          logo: isNull(educations[i].querySelector(q.education.items.school.logo), 'logo').getAttribute('src'),
-          name: isNull(educations[i].querySelector(q.education.items.school.name), 'name').innerText
+      data.skill = []
+      let skills = document.querySelectorAll(q.skill.items.root)
+      for (let i = 0; i < skills.length; i++) {
+        let skill = {}
+        const title = skills[i].querySelector(q.skill.items.title).innerText
+        skill[title] = []
+        const skillNames = skills[i].querySelectorAll(q.skill.items.items)
+        for (let j = 0; j < skillNames.length; j++) {
+          skill[title].push(skillNames[j].innerText)
         }
+        data.skill.push(skill)
       }
-      data.education.push(education)
-    }
-
-    data.skill = []
-    let skills = document.querySelectorAll(q.skill.items.root)
-    for (let i = 0; i < skills.length; i++) {
-      let skill = {}
-      const title = skills[i].querySelector(q.skill.items.title).innerText
-      skill[title] = []
-      const skillNames = skills[i].querySelectorAll(q.skill.items.items)
-      for (let j = 0; j < skillNames.length; j++) {
-        skill[title].push(skillNames[j].innerText)
-      }
-      data.skill.push(skill)
-    }
-    return data
-  }, profileQueries)
+      return data
+    }, profileQueries)
+  }
 }
 
 module.exports = {

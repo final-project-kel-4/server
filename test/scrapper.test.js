@@ -24,8 +24,8 @@ describe('Scrapper Tests', function () {
     it('should run', (done) => {
       let profileUrl = 'https://www.linkedin.com/in/andresuchitra/'
       let auth = {
-        email: 'prasetio017@gmail.com',
-        password: 'prasetio017'
+        email: 'mprasetiodc.official@gmail.com',
+        password: 'mprasetiodc'
       }
       scrapProfile(profileUrl, { auth })
         .then(data => {
@@ -39,8 +39,8 @@ describe('Scrapper Tests', function () {
     it('should run', (done) => {
       let companyUrl = 'https://linkedin.com/company/pt--tokopedia'
       let auth = {
-        email: 'prasetio017@gmail.com',
-        password: 'prasetio017'
+        email: 'mprasetiodc.official@gmail.com',
+        password: 'mprasetiodc'
       }
       scrapCompany(companyUrl, { auth })
         .then(data => {
