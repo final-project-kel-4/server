@@ -25,7 +25,7 @@ const profile = {
     login: 'input#login-submit',
     moreSkill: 'button.pv-skills-section__additional-skills'
   },
-  photo: 'section.pv-top-card-v3 img.pv-top-card-section__photo',
+  photo: 'img.pv-top-card-section__photo',
   name: 'section.pv-top-card-v3 ul.pv-top-card-v3--list > li:first-child',
   currentJob: 'section.pv-top-card-v3 div.ph5.pb5 > div.display-flex.mt2 > div.flex-1.mr5 > h2',
   about: 'section.pv-about-section p.pv-about__summary-text',

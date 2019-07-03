@@ -57,7 +57,7 @@ async function scrapProfile (url, options = { headless: true }) {
       }
       let about = document.querySelector(q.about)
       let data = {
-        photo: document.querySelector(q.photo).getAttribute('src'),
+        photo: isNull(document.querySelector(q.photo), 'photo').getAttribute('src'),
         name: isNull(document.querySelector(q.name), 'name').innerText,
         currentJob: isNull(document.querySelector(q.currentJob), 'current job').innerText,
         about: about ? about.innerText : ''
@@ -67,7 +67,7 @@ async function scrapProfile (url, options = { headless: true }) {
       for (let i = 0; i < experiences.length; i++) {
         let experience = {
           company: {
-            logo: experiences[i].querySelector(q.experience.items.company.logo).getAttribute('src')
+            logo: isNull(experiences[i].querySelector(q.experience.items.company.logo), 'logo 1').getAttribute('src')
           },
         }
         const isMulti = !!experiences[i].querySelector(q.experience.items.isMulti)
@@ -103,7 +103,7 @@ async function scrapProfile (url, options = { headless: true }) {
           degree: degree ? degree.innerText : '',
           field: field ? field.innerText : '',
           school: {
-            logo: isNull(educations[i].querySelector(q.education.items.school.logo), 'logo').getAttribute('src'),
+            logo: isNull(educations[i].querySelector(q.education.items.school.logo), 'logo 2').getAttribute('src'),
             name: isNull(educations[i].querySelector(q.education.items.school.name), 'name').innerText
           }
         }
