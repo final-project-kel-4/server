@@ -168,6 +168,28 @@ class JobController {
             }
         })
     }
+
+    static async doScrap(req, res) {
+        let scrapJobData
+
+        if(!req.user.company) {
+            throw Error("Missing Company LinkedIn URL")    
+        }
+        scrapJobData = scrapJob(req.user.company)
+    }
+}
+
+const scrapJob = async function(link) {
+    let scrapData = []
+    try {
+        scrapData = await scrapper.scrapCompany(link);
+        console.log(scrapData);
+
+    }
+    catch(err) {
+        console.log("ERR - Job.doSCrap -- \n", err);
+        res.status(500).json(err)
+    }
 }
 
 const initModelData = async (rawData) => {
