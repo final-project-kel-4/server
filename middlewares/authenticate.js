@@ -1,3 +1,4 @@
+/* istanbul ignore file */
 const jwt = require('../helpers/jwt')
 const User = require('../models/user')
 

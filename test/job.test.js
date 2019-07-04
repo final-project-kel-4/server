@@ -2,6 +2,7 @@ const chai = require('chai')
 const chaiHttp = require('chai-http')
 const jwt = require('jsonwebtoken')
 const sinon = require('sinon')
+const language = require('@google-cloud/language')
 
 const app = require('../app')
 const userModel = require('../models/user')
@@ -11,6 +12,7 @@ const matchingItemModel = require('../models/matchingitem')
 const candidateModel = require('../models/candidate')
 const clearDb = require('../helpers/clear')
 const scrapper = require('../helpers/linkedin-scrapper')
+const TextUtility = require('../helpers/textProcessing')
 
 const expect = chai.expect
 
@@ -19,7 +21,15 @@ chai.use(chaiHttp)
 const user = {
   name: 'fulan',
   email: 'fulan@gmail.com',
-  password: 'qweasdzxc'
+  password: 'qweasdzxc',
+  company: 'https://linkedin.com/company/pt--tokopedia'
+}
+
+const otherUser = {
+  name: 'fulanah',
+  email: 'fulanah@gmail.com',
+  password: 'qweasdzxc',
+  company: 'https://linkedin.com/company/apple'
 }
 
 const candidate = {
@@ -48,6 +58,8 @@ const linkedInJobData = {
   }
 }
 
+const linkedInCompanyData = Array.from(Array(2), () => linkedInJobData)
+
 const linkedInProfileData = {
   name: 'Fulan',
   photo: 'https://my-image.com/fulan.jpg',
@@ -57,30 +69,59 @@ const linkedInProfileData = {
     {
       position: [
         {
-          name: '',
-          description: ''
+          name: 'UI/UX Designer',
+          description: 'Designing website UI/UX'
         }
       ]
     },
     {
       position: {
-        name: '',
-        description: ''
+        name: 'Project Leader',
+        description: 'Managing project develeopment workflow, and teams'
       }
     }
   ],
   education: [
     {
-      field: ''
+      field: 'Electrical Engineering'
     }
-  ]
+  ],
+  skill: ['javascript', 'nodejs']
+}
+
+let otherLinkedInProfileData = {
+  name: 'Fulanah',
+  photo: 'https://my-image.com/fulanah.jpg'
 }
 
 describe('Job Tests', () => {
   before(function (done) {
-    this.stubScrap = sinon.stub(scrapper, 'scrapJob')
-    this.stubScrap.callsFake(() => linkedInJobData)
-    sinon.stub(scrapper, 'scrapProfile').callsFake(() => linkedInProfileData)
+    this.stubScrapJob = sinon.stub(scrapper, 'scrapJob')
+    this.stubScrapJob.callsFake(() => linkedInJobData)
+    this.stubScrapProfile = sinon.stub(scrapper, 'scrapProfile')
+    this.stubScrapProfile.callsFake(() => linkedInProfileData)
+    sinon.stub(language, 'LanguageServiceClient').callsFake(() => {
+      return {
+        analyzeEntities: () => {
+          const result = {
+            entities: [{
+              name: 'this is number',
+              type: 3,
+              salience: 0
+            }, {
+              name: 'this is string',
+              type: 'string',
+              salience: 0.5
+            }]
+          }
+          return [result]
+        }
+      }
+    })
+    this.stubScrapCompany = sinon.stub(scrapper, 'scrapCompany')
+    this.stubScrapCompany.callsFake(() => linkedInCompanyData)
+    this.stubTextutility = sinon.stub(TextUtility, 'cleanInput')
+    this.stubTextutility.callsFake(() => 'cleaned input')
     done()
   })
 
@@ -92,6 +133,20 @@ describe('Job Tests', () => {
         this.token = jwt.sign({
           _id: this.user._id,
           email: this.user.email
+        }, process.env.SECRET_JWT)
+        done()
+      })
+      .catch(done)
+  })
+
+  before(function (done) {
+    userModel
+      .create(otherUser)
+      .then(user => {
+        this.otherUser = user
+        this.otherToken = jwt.sign({
+          _id: this.otherUser._id,
+          email: this.otherUser.email
         }, process.env.SECRET_JWT)
         done()
       })
@@ -178,15 +233,11 @@ describe('Job Tests', () => {
       .catch(done)
   })
 
+  after(done => clearDb.all(done))
   after(done => {
     sinon.restore()
     done()
   })
-  after(done => clearDb.user(done))
-  after(done => clearDb.matching(done))
-  after(done => clearDb.matchingItem(done))
-  after(done => clearDb.candidate(done))
-  after(done => clearDb.job(done))
 
   describe('GET /job', () => {
     it('should send an object with 200 status code', function (done) {
@@ -217,6 +268,19 @@ describe('Job Tests', () => {
           expect(res).to.have.status(500)
           expect(res.body).to.be.an('object')
           stubFind.restore()
+          done()
+        })
+    })
+
+    it('should send an object with 200 status code', function (done) {
+      chai
+        .request(app)
+        .get('/job')
+        .set('Authorization', this.otherToken)
+        .end((err, res) => {
+          expect(err).to.be.null
+          expect(res).to.have.status(200)
+          expect(res.body).to.be.an('array')
           done()
         })
     })
@@ -293,9 +357,9 @@ describe('Job Tests', () => {
     })
 
     it('should send error object and status code 500 when failed to scrap job', function (done) {
-      this.stubScrap.restore()
-      this.stubScrap = sinon.stub(scrapper, 'scrapJob')
-      this.stubScrap.callsFake(() => {
+      this.stubScrapJob.restore()
+      this.stubScrapJob = sinon.stub(scrapper, 'scrapJob')
+      this.stubScrapJob.callsFake(() => {
         return undefined
       })
 
@@ -330,6 +394,11 @@ describe('Job Tests', () => {
     })
 
     it('should send an object with 201 status code', function (done) {
+      this.stubTextutility.restore()
+      this.stubTextutility = sinon.stub(TextUtility, 'cleanInput')
+      this.stubTextutility.callsFake(() => {
+        return ''
+      })
       chai
         .request(app)
         .post('/job/addCandidate')

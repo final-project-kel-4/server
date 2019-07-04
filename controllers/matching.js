@@ -29,11 +29,10 @@ class MatchingController {
 
         try {
             job = await Job.findOne({_id: jobId});
-            
             candidateIds.forEach(id => {
                 promises.push(Candidate.findOne({_id: id}))
             });
-    
+
             //get all candidate objects
             candidates = await Promise.all(promises);
 
@@ -64,9 +63,8 @@ class MatchingController {
             scoreSort(candidateResult)
 
             return candidateResult
-        }
-        catch(err) {
-            console.log("ERR - MatchingController::matchCandidates \n", err)
+        } catch(err) {
+            /* istanbul ignore next */
             return null;
         }
 
@@ -81,6 +79,7 @@ class MatchingController {
             // TODO - Perform recompare
             // 1. Get the matching model
             matching = await Match.findOne({ _id: matchingId }).populate('items');
+            /* istanbul ignore next */
             if (!matching) new Error('Invalid ID')
             else if (matching.items && matching.items.length > 0) {
                 jobId = matching.job;
@@ -94,7 +93,7 @@ class MatchingController {
                     let found = matchingData.find(x => x.candidate._id.toString() === item.candidate.toString());
 
                     promises.push(MatchingItem.findOneAndUpdate({ _id: item._id }, { score: found.score, scoreDetails: found.scoreDetails }, { new: true }))
-                    
+
                 })
 
                 await Promise.all(promises)

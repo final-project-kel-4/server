@@ -1,3 +1,4 @@
+/* istanbul ignore file */
 const sortScore = arr => {
     arr.sort((a,b) => {
         if(a.score.total > b.score.total) {

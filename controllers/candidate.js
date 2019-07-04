@@ -29,13 +29,19 @@ class CandidateController {
 }
 
 const initModelData = async (rawData) => {
+    /* istanbul ignore next */
     let newData = {profile: {}, entities: {}}
-        
+
     // newData.name = dummy.name
     newData.name = rawData.name
     newData.photo = rawData.photo
     newData.profile.currentPosition = rawData.currentJob
-    newData.profile.about = rawData.about ? TextUtility.cleanInput(rawData.about) : ""
+    /* istanbul ignore if */
+    if (rawData.about) {
+        newData.profile.about = TextUtility.cleanInput(rawData.about)
+    } else {
+        rawData.about = ""
+    }
     newData.profile.workExperience = rawData.experience.map(x => {
         let exp =""
         if(Array.isArray(x.position)){
@@ -95,7 +101,6 @@ const initModelData = async (rawData) => {
     newData.entities.educations = newData.profile.educations.map( async (x) => {
         return await GoogleNLP.analyze(x)
     })
-
 
     return newData
 }

@@ -1,7 +1,7 @@
 const chai = require('chai')
 const chaiHttp = require('chai-http')
 const app = require('../app')
-const { user } = require('../helpers/clear')
+const clearDb = require('../helpers/clear')
 const modelUser = require('../models/user')
 
 chai.should()
@@ -9,27 +9,26 @@ chai.use(chaiHttp)
 
 describe('User', function () {
   let idCurrent
-  
-  after(function (done) {
-    user(done)
-  });
-  
+
+  after(done => clearDb.all(done))
+
   let newUser = {
     name: 'prasetio',
     email: 'prasetio@gmail.com',
-    password: '123'
+    password: '123',
+    company: 'https://linkedin.com/company/pt--tokopedia'
   }
-  
+
   let userLogin = {
     email: newUser.email,
     password: newUser.password
   }
-  
+
   let userLoginWrongPassword = {
     email: newUser.email,
     password: 'sasss'
   }
-  
+
   let userLoginWrongEmail = {
     email: 'tes@gmail.com',
     password: newUser.password

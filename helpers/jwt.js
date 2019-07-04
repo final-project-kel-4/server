@@ -1,3 +1,4 @@
+/* istanbul ignore file */
 const jwt = require('jsonwebtoken')
 
 module.exports = {
@@ -10,6 +11,7 @@ module.exports = {
         let verification = jwt.verify(token, process.env.SECRET_JWT)
         return verification
       } catch{
+        /* istanbul ignore next */
         return null
       }
     }

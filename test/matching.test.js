@@ -9,7 +9,7 @@ const jobModel = require('../models/job')
 const Match = require('../models/matching')
 const matchingItemModel = require('../models/matchingitem')
 const candidateModel = require('../models/candidate')
-const clear = require('../helpers/clear')
+const clearDb = require('../helpers/clear')
 const TextUtility = require('../helpers/textProcessing')
 
 chai.use(chaiHttp)
@@ -19,7 +19,8 @@ const expect = chai.expect
 const user = {
   name: 'fulan',
   email: 'fulan@gmail.com',
-  password: 'qweasdzxc'
+  password: 'qweasdzxc',
+  company: 'https://linkedin.com/company/pt--tokopedia'
 }
 
 const job = {
@@ -115,9 +116,11 @@ describe('Matching Tests', () => {
       .catch(done)
   })
 
-  after(done => clear.user(done))
-  after(done => clear.job(done))
-  after(done => clear.matching(done))
+  after(done => clearDb.all(done))
+  after(done => {
+    sinon.restore()
+    done()
+  })
 
   describe('GET /match/:id', () => {
     it('should send an object with status code 200', function (done) {
@@ -149,7 +152,9 @@ describe('Matching Tests', () => {
     it('should send an object and status code 500 when mongoose throw an error', function (done) {
       const stubFindOne = sinon.stub(Match, 'findOne')
       stubFindOne.callsFake(() => {
-        throw Error('stub error')
+        return {
+          populate: () => Promise.reject({ error: 'stub error' })
+        }
       })
 
       chai

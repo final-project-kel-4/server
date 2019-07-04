@@ -18,9 +18,9 @@ class TextAnalyzer {
             // Detects entities in the document
             const [result] = await client.analyzeEntities({document});
             let entities = result.entities;
-    
+
             entities = entities.filter(x => {
-                if(x.type !== 'NUMBER' && x.salience >= 0.002) 
+                if(x.type !== 'NUMBER' && x.salience >= 0.002)
                 {
                     return true
                 }
@@ -28,15 +28,15 @@ class TextAnalyzer {
                     return false
                 }
             });
-    
+
             entities = entities.map(item => {
                 return {name: item.name, salience: item.salience}
             })
-    
+
             return entities
         }
         catch(err) {
-            console.log("ERR - GoogleNLP => \n", err);
+            /* istanbul ignore next */
             return null
         }
     }

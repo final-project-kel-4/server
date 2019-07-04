@@ -19,18 +19,15 @@ class JobController {
 
         try {
             list = await Job.find({ user: req.user._id });
-            console.log('list', list);
 
             if (list.length === 0) {
-                console.log("Masuk");
-
                 resultScrapCompany = await scrapper.scrapCompany(req.user.company, { auth: auth })
             }
-            console.log(resultScrapCompany);
+
             if (resultScrapCompany) {
 
                 jobCreate = await Promise.all(resultScrapCompany.map(async company => {
-                    
+
                     newData = await JobController.initJobData(company)
                     // newData.linkedinURL = linkedinLink;
                     newData.user = req.user._id;
@@ -42,8 +39,7 @@ class JobController {
 
                     return created
                 }))
-                console.log(jobCreate);
-                
+
                 res.status(200).json(jobCreate)
             }else{
                 list.reverse();
@@ -51,7 +47,6 @@ class JobController {
             }
         }
         catch (err) {
-            console.log(err)
             res.status(500).json(err)
         }
     }
@@ -73,14 +68,13 @@ class JobController {
 
         let newData, linkedinLink = req.body.linkedin
         let created, scrapJobData
-        let matching;
+        let matching
 
         try {
             scrapJobData = await scrapper.scrapJob(linkedinLink);
             if (!scrapJobData) {
                 throw Error('Error scrapping the job link. Please try again.')
             }
-            console.log(scrapJobData);
             //init Job model data
             newData = await JobController.initJobData(scrapJobData)
             newData.linkedinURL = linkedinLink;
@@ -144,8 +138,6 @@ class JobController {
                     return username === newUsername
                 });
 
-                console.log(candidate, currentItem);
-
                 if (!currentItem) {
                     newItem = await modelMatchingItem.create({ candidate: candidate._id })
                     await modelMatching.findOneAndUpdate({ job: req.body.jobId }, { $push: { items: newItem._id } }, { new: true })
@@ -163,33 +155,12 @@ class JobController {
                 counter += 1
             }
 
+            /* istanbul ignore else */
             if (counter >= candidates.length) {
                 let result = await modelMatching.findOne({ job: req.body.jobId }).populate({ path: 'items', populate: { path: 'candidate', model: 'Candidate' } });
                 res.status(201).json(result)
             }
         })
-    }
-
-    static async doScrap(req, res) {
-        let scrapJobData
-
-        if(!req.user.company) {
-            throw Error("Missing Company LinkedIn URL")    
-        }
-        scrapJobData = scrapJob(req.user.company)
-    }
-}
-
-const scrapJob = async function(link) {
-    let scrapData = []
-    try {
-        scrapData = await scrapper.scrapCompany(link);
-        console.log(scrapData);
-
-    }
-    catch(err) {
-        console.log("ERR - Job.doSCrap -- \n", err);
-        res.status(500).json(err)
     }
 }
 
@@ -199,7 +170,12 @@ const initModelData = async (rawData) => {
     newData.name = rawData.name
     newData.photo = rawData.photo
     newData.profile.currentPosition = rawData.currentJob
-    newData.profile.about = rawData.about ? TextUtility.cleanInput(rawData.about) : ""
+    /* istanbul ignore if */
+    if (rawData.about) {
+        newData.profile.about = TextUtility.cleanInput(rawData.about)
+    } else {
+        rawData.about = ""
+    }
     newData.profile.workExperience = rawData.experience.map(x => {
         let exp = ""
         if (Array.isArray(x.position)) {
@@ -218,25 +194,25 @@ const initModelData = async (rawData) => {
 
     let skills = []
     rawData.skill.forEach(x => {
-        console.log(Object.values(x)[0]);
         skills = [...skills, ...Object.values(x)[0]]
-    });
+    })
 
     newData.profile.skill = skills.map(x => {
         return { name: x.toLowerCase() }
     })
-
     //get the NLP result / entities for candidate attributes
     newData.entities.currentPosition = await GoogleNLP.analyze(newData.profile.currentPosition)
     newData.entities.about = await GoogleNLP.analyze(newData.profile.currentPosition)
     newData.entities.currentPosition = await GoogleNLP.analyze(newData.profile.currentPosition)
 
+    /* istanbul ignore else */
     if (newData.profile.workExperience) {
 
         result = await GoogleNLP.analyze(newData.profile.workExperience.join(' '))
         newData.entities.experience = result
     }
 
+    /* istanbul ignore else */
     if (newData.profile.educations) {
         let result
 
@@ -244,6 +220,7 @@ const initModelData = async (rawData) => {
         newData.entities.educations = result
     }
 
+    /* istanbul ignore else */
     if (newData.profile.skill) {
         newData.entities.skill = newData.profile.skill
     }

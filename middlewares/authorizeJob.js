@@ -1,6 +1,7 @@
+/* istanbul ignore file */
 const Job = require('../models/job')
 
-module.exports = function (req, res, next) {    
+module.exports = function (req, res, next) {
     let id = req.params.id
     Job.findOne({ _id: id })
         .then(found => {

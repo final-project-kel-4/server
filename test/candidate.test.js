@@ -16,7 +16,8 @@ chai.use(chaiHttp)
 const user = {
   name: 'fulan',
   email: 'fulan@gmail.com',
-  password: 'qweasdzxc'
+  password: 'qweasdzxc',
+  company: 'https://linkedin.com/company/pt--tokopedia'
 }
 
 const candidate = {
@@ -35,23 +36,24 @@ const linkedInProfileData = {
     {
       position: [
         {
-          name: '',
-          description: ''
+          name: 'UI/UX Designer',
+          description: 'Designing website UI/UX'
         }
       ]
     },
     {
       position: {
-        name: '',
-        description: ''
+        name: 'Project Leader',
+        description: 'Managing project develeopment workflow, and teams'
       }
     }
   ],
   education: [
     {
-      field: ''
+      field: 'Electrical Engineering'
     }
-  ]
+  ],
+  skill: ['javascript', 'nodejs']
 }
 
 describe('Candidate Tests', () => {
@@ -89,7 +91,7 @@ describe('Candidate Tests', () => {
       .catch(done)
   })
 
-  after(done => clearDb.user(done))
+  after(done => clearDb.all(done))
   after(function (done) {
     sinon.restore()
     done()
