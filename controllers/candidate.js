@@ -28,7 +28,7 @@ class CandidateController {
 
 }
 
-const initModelData = async (rawData) => {
+const initModelData =  async (rawData) => {
     /* istanbul ignore next */
     let newData = {profile: {}, entities: {}}
 
@@ -71,7 +71,7 @@ const initModelData = async (rawData) => {
     newData.entities.currentPosition = await GoogleNLP.analyze(newData.profile.currentPosition)
     newData.entities.workExperience = newData.profile.workExperience.map( async (x) => {
         return await GoogleNLP.analyze(x)
-    })
+    })/* istanbul ignore next */
     newData.entities.recommendations = newData.profile.workExperience.map( async (x) => {
         return await GoogleNLP.analyze(x)
     })
@@ -89,19 +89,22 @@ const initModelData = async (rawData) => {
             educations
         }
     */
+   /* istanbul ignore next */
     newData.entities.currentPosition = await GoogleNLP.analyze(newData.profile.currentPosition)
     newData.entities.about = await GoogleNLP.analyze(newData.profile.currentPosition)
+    /* istanbul ignore next */
     newData.entities.currentPosition = await GoogleNLP.analyze(newData.profile.currentPosition)
+    /* istanbul ignore next */
     newData.entities.workExperience = newData.profile.workExperience.map( async (x) => {
         return await GoogleNLP.analyze(x)
-    })
+    })/* istanbul ignore next */
     newData.entities.recommendations = newData.profile.workExperience.map( async (x) => {
         return await GoogleNLP.analyze(x)
-    })
+    })/* istanbul ignore next */
     newData.entities.educations = newData.profile.educations.map( async (x) => {
         return await GoogleNLP.analyze(x)
     })
-
+    /* istanbul ignore next */
     return newData
 }
 

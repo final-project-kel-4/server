@@ -8,7 +8,13 @@ const port = process.env.PORT
 
 let app = express()
 
-mongoose.connect("mongodb+srv://admin:admin@cluster0-ayir7.gcp.mongodb.net/test?retryWrites=true&w=majority", { useNewUrlParser: true })
+/* istanbul ignore else */
+if(process.env.NODE_ENV==="_test"){
+  mongoose.connect("mongodb://localhost:27017/final_project_test", { useNewUrlParser: true })
+}else{
+  mongoose.connect("mongodb+srv://admin:admin@cluster0-ayir7.gcp.mongodb.net/test?retryWrites=true&w=majority", { useNewUrlParser: true })
+}
+
 app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
 app.use(cors())

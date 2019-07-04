@@ -7,7 +7,7 @@
   "license": "MIT",
   "scripts": {
     "dev": "nodemon app.js",
-    "test": "nyc --reporter=lcov --reporter=text-summary mocha --exit --exclude test/scrapper.test.js",
+    "test": "NODE_ENV=_test nyc mocha --exit --exclude test/scrapper.test.js",
     "test-scrapper": "mocha --exit --grep 'Scrapper'"
   },
   "dependencies": {
