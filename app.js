@@ -8,7 +8,7 @@ const port = process.env.PORT
 
 let app = express()
 
-mongoose.connect("mongodb+srv://admin:admin@cluster0-ayir7.gcp.mongodb.net/test?retryWrites=true&w=majority"  + process.env.NODE_ENV, { useNewUrlParser: true })
+mongoose.connect("mongodb+srv://admin:admin@cluster0-ayir7.gcp.mongodb.net/test?retryWrites=true&w=majority", { useNewUrlParser: true })
 app.use(express.urlencoded({ extended: true }))
 app.use(express.json())
 app.use(cors())
